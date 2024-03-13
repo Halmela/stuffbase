@@ -18,8 +18,8 @@ It can be the size of stuff.
 
 ## Motivation
 I want to be able to organize my stuff.
-Where everything is located, what I have lent to whom, what have I done.
-I want to be able to flexibly find and relocate my possenssions.
+Where everything is located, what I have lent to whom, what have I done, when stuff has changed.
+I want to be able to flexibly find and relocate my possessions.
 Types would be a good fit too, because I do not want to constantly re-invent what a book is and I want to view every book I own.
 
 ## Execution
@@ -29,5 +29,7 @@ In my mind I have sketched that there will be tables
 - Type (id ; name ; description ; template.id)
 - Template (id)
 - Measurement (id ; name ; value)
+- Measurement relation(?) (stuff.id ; measurement.id)
 - Time (id ; name ; time)
+- Time relation(?) (stuff.id ; time.id)
 - User (id ; stuff.id)
