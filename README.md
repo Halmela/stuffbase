@@ -26,8 +26,7 @@ Types would be a good fit too, because I do not want to constantly re-invent wha
 In my mind I have sketched that there will be tables
 - Stuff (id ; name ; description)
 - Information (stuff.id ; stuff.id)
-- Type (id ; name ; description ; template.id)
-- Template (id)
+- Type (id ; name ; description ; stuff.id (some stuff with default values))
 - Measurement (id ; name ; value)
 - Measurement relation(?) (stuff.id ; measurement.id)
 - Time (id ; name ; time)
