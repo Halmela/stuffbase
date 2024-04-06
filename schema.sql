@@ -9,11 +9,17 @@ CREATE TABLE Informations (
     id SERIAL PRIMARY KEY,
     stuff INTEGER REFERENCES Stuffs,
     information INTEGER REFERENCES Stuffs,
-    description TEXT
+    description TEXT,
+    owner INTEGER REFERENCES Users
 );
 
 CREATE TABLE Users (
     id SERIAL PRIMARY KEY,
     username TEXT UNIQUE,
     password TEXT
+);
+
+CREATE TABLE Roots (
+    root INTEGER REFERENCES Stuffs,
+    owner INTEGER REFERENCES Users
 );

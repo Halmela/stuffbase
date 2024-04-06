@@ -1,8 +1,9 @@
 <h1>Stuffbase</h1>
 
 {% if session.username %}
-<p>Olet kirjautunut nimellä {{ session.username }}</p>
-<a href="/logout">Kirjaudu ulos</a>
+<p>Logged in as {{ session.username }}</p>
+<p>Root node id: {{ session.root_id }}</p>
+<a href="/logout">Log out</a>
 {% else %}
 <form action="/login" method="POST">
   <p>Username:<br>
@@ -11,7 +12,7 @@
   <p>Password:<br>
     <input type="password" name="password">
   </p>
-  <input type="submit" value="Kirjaudu">
+  <input type="submit" value="Log in">
 </form>
 <a href="/register">Create new user</a>
 {% endif %}

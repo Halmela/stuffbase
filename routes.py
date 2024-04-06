@@ -37,7 +37,8 @@ def register():
         password1 = request.form["password1"]
         password2 = request.form["password2"]
         if password1 != password2:
-            return render_template("error.html", message="Passwords are not the same")
+            return render_template("error.html",
+                                   message="Passwords are not the same")
         success = users.register(username, password1)
         if success[0]:
             return redirect("/")
