@@ -10,3 +10,9 @@ CREATE TABLE Informations (
     information INTEGER REFERENCES Stuffs,
     description TEXT
 );
+
+CREATE TABLE Users (
+    id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE,
+    password TEXT
+);
