@@ -1,11 +1,13 @@
 from app import app
 from flask import render_template, request, redirect, session
-import users
+import users, stuffs
 
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    root_info = stuffs.get_information(session["root_id"])
+    print(root_info)
+    return render_template("index.html", root_info=root_info)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -20,6 +22,18 @@ def login():
             return redirect("/")
         else:
             return render_template("error.html", message=logged[1])
+
+
+@app.route("/newstuff", methods=["POST"])
+def new_stuff():
+    name = request.form["name"]
+    description = request.form["description"]
+    result = stuffs.new_stuff(name, description)
+
+    if result[0]:
+        return redirect("/")
+    else:
+        return render_template("error.html", message=result[1])
 
 
 @app.route("/logout")
@@ -39,8 +53,8 @@ def register():
         if password1 != password2:
             return render_template("error.html",
                                    message="Passwords are not the same")
-        success = users.register(username, password1)
-        if success[0]:
+        result = users.register(username, password1)
+        if result[0]:
             return redirect("/")
         else:
-            return render_template("error.html", message=success[1])
+            return render_template("error.html", message=result[1])
