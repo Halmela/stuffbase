@@ -4,7 +4,6 @@ from flask import session
 
 
 def get_root():
-    print("getting root")
     sql = text("SELECT root FROM Roots WHERE owner=:user_id")
     result = db.session.execute(sql, {"user_id": session["user_id"]})
     return result.fetchone().root

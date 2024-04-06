@@ -16,7 +16,6 @@ def login(username, password):
             session["user_id"] = user.id
             session["username"] = username
             session["root_id"] = stuffs.get_root()
-            print("root got")
             return (True, "")
         else:
             return (False, "Username and password do not match")
@@ -30,7 +29,6 @@ def logout():
 def register(username, password):
     hash_value = generate_password_hash(password)
     try:
-        print(hash_value)
         sql = text("""
         INSERT INTO users (username, password)
         VALUES (:username, :password)
