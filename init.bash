@@ -21,3 +21,24 @@ pip install -r ./requirements.txt
 
 echo Initialize database with name "stuffbase"
 psql -d stuffbase < schema.sql
+
+echo lets create a base for .env file
+echo Is psql installed with local-pg script? y/n
+read -r
+if [[ $REPLY = "y" ]]; then
+  echo "double check that this works, I have not done that. The user part might not be necessary..."
+  url="postgresql+psycopg2://$USER@localhost/stuffbase"
+else
+  url="postgresql:///$USER@localhost/stuffbase"
+fi
+
+echo "database URL: $url"
+
+echo generate secret...
+secret=$(python3 -c 'import secrets
+print(secrets.token_hex(16))')  
+
+cat << EOF > .env
+DATABASE_URL="$url"
+SECRET_KEY="$secret"
+EOF
