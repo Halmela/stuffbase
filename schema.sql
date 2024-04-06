@@ -1,5 +1,6 @@
 CREATE TABLE Stuffs (
     id SERIAL PRIMARY KEY,
+    owner INTEGER REFERENCES Users,
     name TEXT,
     description TEXT
 );
