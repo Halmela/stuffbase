@@ -26,10 +26,9 @@ echo lets create a base for .env file
 echo Is psql installed with local-pg script? y/n
 read -r
 if [[ $REPLY = "y" ]]; then
-  echo "double check that this works, I have not done that. The user part might not be necessary..."
-  url="postgresql+psycopg2://$USER@localhost/stuffbase"
+  url="postgresql+psycopg2://stuffbase"
 else
-  url="postgresql:///$USER@localhost/stuffbase"
+  url="postgresql:///stuffbase"
 fi
 
 echo "database URL: $url"
