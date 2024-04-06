@@ -1,6 +1,15 @@
 # StuffBase
 Database for logging information on stuff. 
 
+## How to run
+Install postgresql (I use 14.11) with your preferred method and give your user permission to create databases.
+
+```
+bash init.bash
+flask run
+```
+
+
 ## Definitions
 
 ### Stuff
