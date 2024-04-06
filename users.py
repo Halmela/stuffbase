@@ -21,16 +21,30 @@ def login(username, password):
 
 def logout():
     del session["user_id"]
+    del session["username"]
 
 
 def register(username, password):
     hash_value = generate_password_hash(password)
     try:
-        sql = text("INSERT INTO users (username,password) VALUES (:username,:password)")
+        sql = text("INSERT INTO users (username,password) \
+            VALUES (:username,:password)")
         db.session.execute(sql, {"username": username, "password": hash_value})
         db.session.commit()
     except Exception as e:
         return (False, e)
+
+    try:
+        sql = text("""
+            INSERT INTO Stuffs (name, description, owner)
+            VALUES (Root, Root node,
+            (SELECT id from Users WHERE username=:username))
+            """)
+        db.session.execute(sql, {"username": username})
+        db.session.commit()
+    except Exception as e:
+        return (False, e)
+
     return login(username, password)
 
 
