@@ -12,7 +12,7 @@
 
   {% for stuff in root_info %}
   <tr>
-    <td>{{stuff[0]}}</td>
+    <td><a href='{{"/stuff/%s" % stuff[0]}}'>{{stuff[0]}}</a></td>
     <td>{{stuff[1]}}</td>
     <td>{{stuff[2]}}</td>
   </tr>

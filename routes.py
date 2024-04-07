@@ -7,6 +7,7 @@ import users, stuffs
 def index():
     if "root_id" in session:
         root_info = stuffs.get_information(session["root_id"])
+        print(root_info)
         return render_template("index.html", root_info=root_info)
     else:
         return render_template("index.html")
@@ -24,6 +25,21 @@ def login():
             return redirect("/")
         else:
             return render_template("error.html", message=logged[1])
+
+
+@app.route("/stuff/<int:id>")
+def stuff(id):
+    if "user_id" not in session:
+        return redirect("/")
+
+    stuff = stuffs.get_stuff(id)
+    if not stuff:
+        return render_template("error.html",
+                               message=f"you do not have stuff with id {id}")
+
+    info = stuffs.get_information(id)
+    print(info)
+    return render_template("stuff.html", stuff=stuff, info=info)
 
 
 @app.route("/newrootstuff", methods=["POST"])

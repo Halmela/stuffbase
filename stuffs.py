@@ -11,7 +11,7 @@ def get_root():
 
 def get_stuff(stuff_id):
     sql = text("""
-        SELECT id, name, description
+        SELECT id, name, description, owner
         FROM Stuffs
         WHERE id=:stuff_id AND owner=:user_id
     """)
@@ -23,8 +23,9 @@ def get_stuff(stuff_id):
 def get_information(stuff_id):
     sql = text("""
     SELECT DISTINCT S.id, S.name, S.description, I.description
-    FROM Stuffs S, Informations I
-    WHERE I.stuff=:stuff_id AND S.owner=:user_id AND NOT S.id=:stuff_id
+    FROM Stuffs S JOIN Informations I
+                  ON S.id=I.information
+    WHERE I.stuff=:stuff_id AND S.owner=:user_id
     """)
     result = db.session.execute(sql, {"stuff_id": stuff_id,
                                       "user_id": session["user_id"]})
