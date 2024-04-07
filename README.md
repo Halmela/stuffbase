@@ -1,7 +1,8 @@
 # StuffBase
 Database for logging information on stuff. 
 
-## How to run
+## CURRENT STATE
+### How to run
 Install postgresql (I use 14.11) with your preferred method and give your user permission to create databases.
 
 ```
@@ -9,7 +10,13 @@ Install postgresql (I use 14.11) with your preferred method and give your user p
 ./run.bash
 ```
 
+### usage
+create user and then add stuff to root.
+you can give stuff a description.
 
+
+
+## INITIAL THOUGHTS
 ## Definitions
 
 ### Stuff
