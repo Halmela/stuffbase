@@ -1,5 +1,6 @@
-<h1>Stuffbase</h1>
-
+{% extends "layout.html" %}
+{% block title %}{{ session.username or "Login" }}{% endblock %}
+{% block content %}
 {% if session.username %}
 <p>Logged in as {{ session.username }}</p>
 <p>Root node id: {{ session.root_id }}</p>
@@ -21,7 +22,7 @@
 </table>
 <p>Insert new stuff into root
 <p>
-<form action="/newstuff" method="POST">
+<form action="/newrootstuff" method="POST">
   <p>Name:<br>
     <input type="text" name="name">
   </p>
@@ -30,8 +31,6 @@
   </p>
   <input type="submit" value="New stuff">
 </form>
-
-<a href="/logout">Log out</a>
 {% else %}
 <form action="/login" method="POST">
   <p>Username:<br>
@@ -44,3 +43,4 @@
 </form>
 <a href="/register">Create new user</a>
 {% endif %}
+{% endblock %}

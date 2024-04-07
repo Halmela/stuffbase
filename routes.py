@@ -5,9 +5,11 @@ import users, stuffs
 
 @app.route("/")
 def index():
-    root_info = stuffs.get_information(session["root_id"])
-    print(root_info)
-    return render_template("index.html", root_info=root_info)
+    if "root_id" in session:
+        root_info = stuffs.get_information(session["root_id"])
+        return render_template("index.html", root_info=root_info)
+    else:
+        return render_template("index.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -24,11 +26,11 @@ def login():
             return render_template("error.html", message=logged[1])
 
 
-@app.route("/newstuff", methods=["POST"])
-def new_stuff():
+@app.route("/newrootstuff", methods=["POST"])
+def new_rootstuff():
     name = request.form["name"]
     description = request.form["description"]
-    result = stuffs.new_stuff(name, description)
+    result = stuffs.new_rootstuff(name, description)
 
     if result[0]:
         return redirect("/")

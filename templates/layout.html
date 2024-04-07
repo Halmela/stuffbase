@@ -1,0 +1,12 @@
+<!doctype html>
+<title>Stuffbase - {% block title %}{% endblock %}</title>
+
+<div class="header">
+  <h1><a href="/">Stuffbase</a></h1>
+  {% if session.username %}
+  <a href="/logout">Log out</a>
+  {% endif %}
+</div>
+<hr>
+
+{% block content %}{% endblock %}

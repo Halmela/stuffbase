@@ -31,7 +31,7 @@ def get_information(stuff_id):
     return result.fetchall()
 
 
-def new_stuff(name, description):
+def new_rootstuff(name, description):
     try:
         sql = text("""
                 INSERT INTO Stuffs (name, description, owner)
