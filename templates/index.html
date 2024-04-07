@@ -2,7 +2,6 @@
 {% block title %}{{ session.username or "Login" }}{% endblock %}
 {% block content %}
 {% if session.username %}
-<p>Logged in as {{ session.username }}</p>
 <p>Root node id: {{ session.root_id }}</p>
 <table>
   <tr>
