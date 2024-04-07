@@ -24,6 +24,7 @@ def login(username, password):
 def logout():
     del session["user_id"]
     del session["username"]
+    del session["root_id"]
 
 
 def register(username, password):
