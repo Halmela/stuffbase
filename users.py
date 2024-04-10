@@ -31,29 +31,31 @@ def register(username, password):
     hash_value = generate_password_hash(password)
     try:
         sql = text("""
-        INSERT INTO users (username, password)
-        VALUES (:username, :password)
+            INSERT INTO users (username, password)
+            VALUES (:username, :password)
+            RETURNING id
         """)
-        db.session.execute(sql, {"username": username, "password": hash_value})
+        result = db.session.execute(sql, {"username": username,
+                                          "password": hash_value})
+        user_id = result.scalar()
     except Exception as e:
         return (False, e)
 
+    if not user_id:
+        return (False, "User not created correctly")
     try:
-        user_id = text("SELECT id FROM users WHERE username=:username")
-        result = db.session.execute(user_id, {"username": username})
-        user_id = result.fetchone().id
-        if not user_id:
-            return (False, "User not created correctly")
         sql = text("""
             INSERT INTO Stuffs (name, description, owner)
-            VALUES ('Root', 'Root node', :owner)
+            VALUES ('Root', '', :owner)
+            RETURNING id
             """)
-        db.session.execute(sql, {"owner": user_id})
+        result = db.session.execute(sql, {"owner": user_id})
+        root_id = result.scalar()
         root = text("""
             INSERT INTO Roots (root, owner)
-            VALUES ((SELECT id FROM Stuffs WHERE name='Root' AND owner=:owner),:owner)
+            VALUES (:root_id, :owner)
             """)
-        db.session.execute(root, {"owner": user_id})
+        db.session.execute(root, {"owner": user_id, "root_id": root_id})
         db.session.commit()
     except Exception as e:
         return (False, e)
