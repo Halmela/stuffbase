@@ -32,9 +32,6 @@ def stuff(id):
     if "user_id" not in session or id == session["root_id"]:
         return redirect("/")
 
-    if session["csrf_token"] != request.form["csrf_token"]:
-        abort(403)
-
     stuff = stuffs.get_stuff(id)
     if not stuff:
         return render_template("error.html",
