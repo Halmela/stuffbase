@@ -28,6 +28,7 @@
   <p>Description:<br>
     <input type="text" name="description">
   </p>
+  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
   <input type="submit" value="New stuff">
 </form>
 {% else %}

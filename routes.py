@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, redirect, session
+from flask import render_template, request, redirect, session, abort
 import users, stuffs
 
 
@@ -32,6 +32,9 @@ def stuff(id):
     if "user_id" not in session or id == session["root_id"]:
         return redirect("/")
 
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
     stuff = stuffs.get_stuff(id)
     if not stuff:
         return render_template("error.html",
@@ -45,6 +48,9 @@ def stuff(id):
 
 @app.route("/newinformation", methods=["POST"])
 def new_info():
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
     new_name = request.form["name"]
     new_description = request.form["description"]
     info_description = request.form["information"]
@@ -60,6 +66,9 @@ def new_info():
 
 @app.route("/newrootstuff", methods=["POST"])
 def new_rootstuff():
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
     name = request.form["name"]
     description = request.form["description"]
     result = stuffs.new_information(name, description, "", session["root_id"])

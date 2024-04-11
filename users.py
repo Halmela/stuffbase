@@ -3,6 +3,7 @@ from flask import session
 from sqlalchemy.sql import text
 from werkzeug.security import check_password_hash, generate_password_hash
 import stuffs
+import secrets
 
 
 def login(username, password):
@@ -16,6 +17,7 @@ def login(username, password):
             session["user_id"] = user.id
             session["username"] = username
             session["root_id"] = stuffs.get_root()
+            session["csrf_token"] = secrets.token_hex(16)
             return (True, "")
         else:
             return (False, "Username and password do not match")
@@ -25,6 +27,7 @@ def logout():
     del session["user_id"]
     del session["username"]
     del session["root_id"]
+    del session["csrf_token"]
 
 
 def register(username, password):
