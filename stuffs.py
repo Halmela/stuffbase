@@ -22,11 +22,12 @@ def get_stuff(stuff_id):
 
 def get_information(stuff_id):
     sql = text("""
-    SELECT DISTINCT S.id, S.name, S.description, I.description
-    FROM Stuffs S JOIN Informations I
-                  ON S.id=I.information
-    WHERE I.stuff=:stuff_id AND S.owner=:user_id
-    """)
+            SELECT DISTINCT S.id, S.name, S.description, I.description
+            FROM Informations I, Stuffs S
+                JOIN InformationRelations IR
+                ON S.id = IR.information
+            WHERE IR.stuff = :stuff_id AND S.owner=:user_id
+        """)
     result = db.session.execute(sql, {"stuff_id": stuff_id,
                                       "user_id": session["user_id"]})
     return result.fetchall()
@@ -74,33 +75,37 @@ def new_stuff(name, description):
         return (False, e)
 
 
-def new_information(stuff_id, information_id, description):
-    # TODO: do this with SQL; probably check constraint with separate function
-    test = text("""
-        SELECT CAST(COUNT(*) AS BIT)
-        FROM Stuffs S, Stuffs I
-        WHERE S.id=:stuff_id
-          AND I.id=:information_id
-          AND S.owner=I.owner
-          AND S.owner=:user_id
-        """)
-    result = db.session.execute(test,
-                                {"stuff_id": stuff_id,
-                                 "information_id": information_id,
-                                 "user_id": session["user:id"]})
-    if not result.scalar():
-        return (False, "You are not the owner of that stuff!!")
+def new_information(new_name, new_description, info_description, stuff_id):
+    info_id = new_stuff(new_name, new_description)
+    if not info_id[0]:
+        return info_id
 
+    return attach_information(stuff_id, info_id[1], info_description)
+
+
+def attach_information(stuff_id, information_id, description):
     try:
         sql = text("""
-                INSERT INTO Informations (stuff, information, owner)
-                VALUES (:stuff, :information, :owner)
+                INSERT INTO Informations (description, owner)
+                VALUES (:description, :owner)
+                RETURNING id
+            """)
+        result = db.session.execute(sql,
+                                    {"description": description,
+                                     "owner": session["user_id"]})
+        info_id = result.scalar()
+
+        sql = text("""
+                INSERT INTO InformationRelations (info_id, stuff, information)
+                VALUES (:info_id, :stuff, :information)
             """)
         db.session.execute(sql,
-                           {"stuff": stuff_id,
-                            "information": information_id,
-                            "owner": session["user_id"]})
+                           {"info_id": info_id,
+                            "stuff": stuff_id,
+                            "information": information_id
+                            })
+
         db.session.commit()
-        return (True, "")
+        return (True, info_id)
     except Exception as e:
         return (False, e)

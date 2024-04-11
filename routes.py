@@ -29,7 +29,7 @@ def login():
 
 @app.route("/stuff/<int:id>")
 def stuff(id):
-    if "user_id" not in session:
+    if "user_id" not in session or id == session["root_id"]:
         return redirect("/")
 
     stuff = stuffs.get_stuff(id)
@@ -42,11 +42,26 @@ def stuff(id):
     return render_template("stuff.html", stuff=stuff, info=info)
 
 
+@app.route("/newinfo", methods=["POST"])
+def new_info():
+    new_name = request.form["name"]
+    new_description = request.form["description"]
+    info_description = request.form["information"]
+    stuff_id = request.form["stuff_id"]
+    result = stuffs.new_information(new_name, new_description,
+                                    info_description, stuff_id)
+
+    if result[0]:
+        return redirect(f"/stuff/{stuff_id}")
+    else:
+        return render_template("error.html", message=result[1])
+
+
 @app.route("/newrootstuff", methods=["POST"])
 def new_rootstuff():
     name = request.form["name"]
     description = request.form["description"]
-    result = stuffs.new_rootstuff(name, description)
+    result = stuffs.new_information(name, description, "", session["root_id"])
 
     if result[0]:
         return redirect("/")

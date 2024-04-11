@@ -1,0 +1,33 @@
+CREATE TABLE Users (
+    id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE,
+    password TEXT
+);
+
+
+CREATE TABLE Stuffs (
+    id SERIAL PRIMARY KEY,
+    owner INTEGER REFERENCES Users ON DELETE CASCADE,
+    name TEXT,
+    description TEXT
+);
+
+
+CREATE TABLE Informations (
+    id SERIAL PRIMARY KEY,
+    description TEXT,
+    owner INTEGER REFERENCES Users ON DELETE CASCADE
+);
+
+
+CREATE TABLE InformationRelations (
+    info_id INTEGER REFERENCES Informations ON DELETE CASCADE,
+    stuff INTEGER REFERENCES Stuffs ON DELETE CASCADE,
+    information INTEGER REFERENCES Stuffs ON DELETE CASCADE
+);
+
+
+CREATE TABLE Roots (
+    owner INTEGER REFERENCES Users ON DELETE CASCADE,
+    root INTEGER REFERENCES Stuffs ON DELETE CASCADE
+);

@@ -38,18 +38,18 @@ def register(username, password):
         result = db.session.execute(sql, {"username": username,
                                           "password": hash_value})
         user_id = result.scalar()
-    except Exception as e:
-        return (False, e)
 
-    if not user_id:
-        return (False, "User not created correctly")
-    try:
+        if not user_id:
+            return (False, "User not created correctly")
+
+        # user is not logged at this point, so we can't use stuffs.new_stuff()
         sql = text("""
             INSERT INTO Stuffs (name, description, owner)
-            VALUES ('Root', '', :owner)
+            VALUES (:username, '', :owner)
             RETURNING id
             """)
-        result = db.session.execute(sql, {"owner": user_id})
+        result = db.session.execute(sql, {"username": username,
+                                          "owner": user_id})
         root_id = result.scalar()
         root = text("""
             INSERT INTO Roots (root, owner)
