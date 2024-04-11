@@ -1,3 +1,10 @@
+CREATE TABLE Users (
+    id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE,
+    password TEXT
+);
+
+
 CREATE TABLE Stuffs (
     id SERIAL PRIMARY KEY,
     owner INTEGER REFERENCES Users,
@@ -11,12 +18,6 @@ CREATE TABLE Informations (
     information INTEGER REFERENCES Stuffs,
     description TEXT,
     owner INTEGER REFERENCES Users
-);
-
-CREATE TABLE Users (
-    id SERIAL PRIMARY KEY,
-    username TEXT UNIQUE,
-    password TEXT
 );
 
 CREATE TABLE Roots (
