@@ -38,11 +38,12 @@ def stuff(id):
                                message=f"you do not have stuff with id {id}")
 
     info = stuffs.get_information(id)
-    print(info)
-    return render_template("stuff.html", stuff=stuff, info=info)
+    rev_info = stuffs.get_reverse_information(id)
+    return render_template("stuff.html", stuff=stuff,
+                           info=info, rev_info=rev_info)
 
 
-@app.route("/newinfo", methods=["POST"])
+@app.route("/newinformation", methods=["POST"])
 def new_info():
     new_name = request.form["name"]
     new_description = request.form["description"]

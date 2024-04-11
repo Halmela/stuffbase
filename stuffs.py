@@ -26,7 +26,24 @@ def get_information(stuff_id):
             FROM Informations I, Stuffs S
                 JOIN InformationRelations IR
                 ON S.id = IR.information
-            WHERE IR.stuff = :stuff_id AND S.owner=:user_id
+            WHERE IR.stuff = :stuff_id
+                AND S.owner=:user_id
+                AND I.id = IR.info_id
+        """)
+    result = db.session.execute(sql, {"stuff_id": stuff_id,
+                                      "user_id": session["user_id"]})
+    return result.fetchall()
+
+
+def get_reverse_information(stuff_id):
+    sql = text("""
+            SELECT DISTINCT S.id, S.name, S.description, I.description
+            FROM Informations I, Stuffs S
+                JOIN InformationRelations IR
+                ON S.id = IR.stuff
+            WHERE IR.information = :stuff_id
+                AND S.owner=:user_id
+                AND I.id = IR.info_id
         """)
     result = db.session.execute(sql, {"stuff_id": stuff_id,
                                       "user_id": session["user_id"]})
