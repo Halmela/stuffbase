@@ -4,6 +4,7 @@ from sqlalchemy.sql import text
 from werkzeug.security import check_password_hash, generate_password_hash
 import stuffs
 import secrets
+from os import getenv
 
 
 def login(username, password):
@@ -30,7 +31,7 @@ def logout():
     del session["csrf_token"]
 
 
-def register(username, password):
+def create_user(username, password):
     hash_value = generate_password_hash(password)
     try:
         sql = text("""
@@ -60,11 +61,67 @@ def register(username, password):
             """)
         db.session.execute(root, {"owner": user_id, "root_id": root_id})
         db.session.commit()
+        return (True, user_id)
     except Exception as e:
         return (False, e)
 
+
+def promote_admin(id):
+    try:
+        sql = text("""
+                INSERT INTO Admins
+                VALUES (:id)
+            """)
+        db.session.execute(sql, {"id": id})
+        db.session.commit()
+        return (True, None)
+    except Exception as e:
+        return (False, e)
+
+
+def admin_exists():
+    try:
+        sql = text("""
+                SELECT CAST(COUNT(*) AS BIT)
+                FROM Admins
+            """)
+        result = db.session.execute(sql)
+        admin = bool(int(result.scalar()))
+
+        if admin:
+            return (False, "Admin account already exists")
+        return (True, "")
+    except Exception as e:
+        return (False, e)
+
+
+def is_admin(id):
+    try:
+        sql = text("""
+                SELECT CAST(COUNT(*) AS BIT)
+                FROM Admins
+                WHERE id = :id
+            """)
+        result = db.session.execute(sql, {"id": id})
+        admin = bool(int(result.scalar()))
+        return (admin, "" if admin else "You are not a admin")
+    except Exception as e:
+        return (False, e)
+
+
+def create_admin():
+    username = getenv("ADMIN_USERNAME")
+    password = generate_password_hash(getenv("ADMIN_PASSWORD"))
+    created = create_user(username, password)
+    if not created[0]:
+        print("Something went wrong with creating admin account:")
+        print(created[1])
+        return (False, created[1])
+
+    promoted = promote_admin(created[1])
+    if not promoted[0]:
+        print("Something went wrong with promoting admin account:")
+        print(promoted[1])
+        return (False, created[1])
+
     return login(username, password)
-
-
-def user_id():
-    return session.get("user_id", 0)

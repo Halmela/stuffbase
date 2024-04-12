@@ -126,3 +126,31 @@ def attach_information(stuff_id, information_id, description):
         return (True, info_id)
     except Exception as e:
         return (False, e)
+
+
+def new_text_property(name, description):
+    try:
+        sql = text("""
+                INSERT INTO Text_property_informations
+                VALUES (:name, :description)
+            """)
+        db.session.execute(sql, {"name": name,
+                                 "description": description})
+        db.session.commit()
+        return (True, id)
+    except Exception as e:
+        return (False, e)
+
+
+def new_numeric_property(name, description):
+    try:
+        sql = text("""
+                INSERT INTO Numeric_property_informations
+                VALUES (:name, :description)
+            """)
+        db.session.execute(sql, {"name": name,
+                                 "description": description})
+        db.session.commit()
+        return (True, id)
+    except Exception as e:
+        return (False, e)

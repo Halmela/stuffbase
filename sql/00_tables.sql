@@ -4,10 +4,15 @@ CREATE TABLE Users (
     password TEXT
 );
 
+CREATE TABLE Admins (
+    id INTEGER REFERENCES Users ON DELETE CASCADE
+);
 
 CREATE TABLE Stuffs (
     id SERIAL PRIMARY KEY,
-    owner INTEGER REFERENCES Users ON DELETE CASCADE
+    owner INTEGER REFERENCES Users ON DELETE CASCADE,
+    name TEXT,
+    description TEXT
 );
 
 CREATE TABLE Informations (
@@ -30,7 +35,7 @@ CREATE TABLE Roots (
 
 
 CREATE TABLE Text_property_informations (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name TEXT UNIQUE,
     description TEXT
 );
@@ -42,7 +47,7 @@ CREATE TABLE Text_properties (
 );
 
 CREATE TABLE Numeric_property_informations (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name TEXT UNIQUE,
     description TEXT
 );

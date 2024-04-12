@@ -13,6 +13,26 @@ def index():
         return render_template("index.html")
 
 
+@app.route("/admin")
+def admin():
+    if "user_id" not in session:
+        exists = users.admin_exists()
+        if not exists[0]:
+            return render_template("error.html", message=exists[1])
+        success = users.create_admin()
+
+        if not success[0]:
+            return render_template("error.html", message=success[1])
+        return render_template("admin.html")
+    
+    admin = users.is_admin(session["user_id"])
+    print(admin)
+    if admin[0]:
+        return render_template("admin.html")
+    else:
+        return render_template("error.html", message=admin[1])
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
@@ -25,6 +45,28 @@ def login():
             return redirect("/")
         else:
             return render_template("error.html", message=logged[1])
+
+
+@app.route("/newproperty", methods=["POST"])
+def new_property():
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
+    name = request.form["name"]
+    description = request.form["description"]
+    type = request.form["type"]
+
+    admin = users.is_admin(session["user_id"])
+
+    if not admin[0]:
+        return redirect("error.html", message=admin[0])
+
+    if type == "text":
+        stuffs.new_text_property(name, description)
+    elif type == "numeric":
+        stuffs.new_numeric_property(name, description)
+    else:
+        return redirect("error.html", message="you did a funny")
 
 
 @app.route("/stuff/<int:id>")
@@ -93,8 +135,12 @@ def register():
         if password1 != password2:
             return render_template("error.html",
                                    message="Passwords are not the same")
-        result = users.register(username, password1)
-        if result[0]:
-            return redirect("/")
-        else:
-            return render_template("error.html", message=result[1])
+        created = users.create_user(username, password1)
+        if not created[0]:
+            return render_template("error.html", message=created[1])
+
+        logged = users.login(username, password1)
+        if not logged[0]:
+            return render_template("error.html", message=logged[1])
+
+        return redirect("/")

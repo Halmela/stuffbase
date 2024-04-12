@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block title %}{{ Admin }}{% endblock %}
+{% block content %}
+<p>Create new property</p>
+<form action="/newproperty" method="POST">
+  <p>Name:<br>
+    <input type="text" name="name">
+  </p>
+  <p>Description:<br>
+    <input type="text" name="description">
+  </p>
+  <p>Type of property</p>
+  <div>
+    <input type="radio" id="text" name="type" value="text" />
+    <label for="text">Text</label>
+  </div>
+  <div>
+    <input type="radio" id="numeric" name="type" value="numeric" />
+    <label for="numeric">Numeric</label>
+  </div>
+  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+  <input type="submit" value="Create">
+</form>
+
+{% endblock %}
