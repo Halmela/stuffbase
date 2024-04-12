@@ -7,11 +7,8 @@ CREATE TABLE Users (
 
 CREATE TABLE Stuffs (
     id SERIAL PRIMARY KEY,
-    owner INTEGER REFERENCES Users ON DELETE CASCADE,
-    name TEXT,
-    description TEXT
+    owner INTEGER REFERENCES Users ON DELETE CASCADE
 );
-
 
 CREATE TABLE Informations (
     id SERIAL PRIMARY KEY,
@@ -26,8 +23,32 @@ CREATE TABLE InformationRelations (
     information INTEGER REFERENCES Stuffs ON DELETE CASCADE
 );
 
-
 CREATE TABLE Roots (
     owner INTEGER REFERENCES Users ON DELETE CASCADE,
     root INTEGER REFERENCES Stuffs ON DELETE CASCADE
+);
+
+
+CREATE TABLE Text_property_informations (
+    id INTEGER PRIMARY KEY,
+    name TEXT UNIQUE,
+    description TEXT
+);
+
+CREATE TABLE Text_properties (
+    property_id INTEGER REFERENCES Text_property_informations,
+    stuff_id INTEGER REFERENCES Stuffs,
+    text TEXT
+);
+
+CREATE TABLE Numeric_property_informations (
+    id INTEGER PRIMARY KEY,
+    name TEXT UNIQUE,
+    description TEXT
+);
+
+CREATE TABLE Numeric_properties (
+    property_id INTEGER REFERENCES Numeric_property_informations,
+    stuff_id INTEGER REFERENCES Stuffs,
+    number NUMERIC
 );
