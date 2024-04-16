@@ -16,15 +16,22 @@ def index():
 @app.route("/admin")
 def admin():
     if "user_id" not in session:
-        exists = users.admin_exists()
-        if not exists[0]:
-            return render_template("error.html", message=exists[1])
-        success = users.create_admin()
+        return render_template("index.html")
 
-        if not success[0]:
-            return render_template("error.html", message=success[1])
+    if users.is_admin(session["user_id"])[0]:
         return render_template("admin.html")
-    
+
+    inexistant = users.admin_does_not_exist()
+    print(inexistant)
+    if not inexistant[0]:
+        return render_template("error.html", message=inexistant[1])
+
+    success = users.promote_admin(session["user_id"])
+    print(success)
+
+    if not success[0]:
+        return render_template("error.html", message=success[1])
+
     admin = users.is_admin(session["user_id"])
     print(admin)
     if admin[0]:

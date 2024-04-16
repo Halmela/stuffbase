@@ -79,7 +79,7 @@ def promote_admin(id):
         return (False, e)
 
 
-def admin_exists():
+def admin_does_not_exist():
     try:
         sql = text("""
                 SELECT CAST(COUNT(*) AS BIT)
@@ -107,21 +107,3 @@ def is_admin(id):
         return (admin, "" if admin else "You are not a admin")
     except Exception as e:
         return (False, e)
-
-
-def create_admin():
-    username = getenv("ADMIN_USERNAME")
-    password = generate_password_hash(getenv("ADMIN_PASSWORD"))
-    created = create_user(username, password)
-    if not created[0]:
-        print("Something went wrong with creating admin account:")
-        print(created[1])
-        return (False, created[1])
-
-    promoted = promote_admin(created[1])
-    if not promoted[0]:
-        print("Something went wrong with promoting admin account:")
-        print(promoted[1])
-        return (False, created[1])
-
-    return login(username, password)

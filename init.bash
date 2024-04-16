@@ -37,16 +37,7 @@ echo generate secret...
 SECRET_KEY=$(python3 -c 'import secrets
 print(secrets.token_hex(16))')  
 
-echo generate admin credientials
-echo the account will be created first time you go to /admin without logging in
-ADMIN_USERNAME=$(python3 -c 'import secrets
-print(secrets.token_hex(16))')  
-ADMIN_PASSWORD=$(python3 -c 'import secrets
-print(secrets.token_hex(16))')  
-
 cat << EOF > .env
 DATABASE_URL="$DATABASE_URL"
 SECRET_KEY="$SECRET_KEY"
-ADMIN_USERNAME="$ADMIN_USERNAME"
-ADMIN_PASSWORD="$ADMIN_PASSWORD"
 EOF
