@@ -63,4 +63,58 @@
   <input type="submit" value="New stuff">
 </form>
 
+{% if stuff_props %}
+<table>
+  <tr>
+    <th>name</th>
+    <th>value</th>
+  </tr>
+
+  {% for p in stuff_props %}
+  <tr>
+    <td>{{p[0]}}</td>
+    <td>{{p[1]}}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<p>New text property
+<p>
+<form action="/attachtextproperty" method="POST">
+  <label for="property_id">Choose a property</label>
+  <select name="property_id" id="property_id">
+    <option value="">Choose a property</option>
+    {% for t in text_props %}
+    <option value={{t[0]}}>{{t[1]}}
+  </select>
+  {% endfor %}
+
+  <p>Text:<br>
+    <input type="text" name="text">
+  </p>
+  <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+  <input type="submit" value="New property">
+</form>
+
+<p>New numeric property
+<p>
+<form action="/attachnumericproperty" method="POST">
+  <label for="property_id">Choose a property</label>
+  <select name="property_id" id="property_id">
+    <option value="">Choose a property</option>
+    {% for t in num_props %}
+    <option value={{t[0]}}>{{t[1]}}
+  </select>
+  {% endfor %}
+
+  <p>Number:<br>
+    <input type="number" name="number">
+  </p>
+  <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+  <input type="submit" value="New property">
+</form>
+
 {% endblock %}

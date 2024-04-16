@@ -41,8 +41,8 @@ CREATE TABLE Text_property_informations (
 );
 
 CREATE TABLE Text_properties (
-    property_id INTEGER REFERENCES Text_property_informations,
     stuff_id INTEGER REFERENCES Stuffs,
+    property_id INTEGER REFERENCES Text_property_informations,
     text TEXT
 );
 
@@ -53,7 +53,7 @@ CREATE TABLE Numeric_property_informations (
 );
 
 CREATE TABLE Numeric_properties (
-    property_id INTEGER REFERENCES Numeric_property_informations,
     stuff_id INTEGER REFERENCES Stuffs,
+    property_id INTEGER REFERENCES Numeric_property_informations,
     number NUMERIC
 );

@@ -69,11 +69,50 @@ def new_property():
         return redirect("error.html", message=admin[0])
 
     if type == "text":
-        stuffs.new_text_property(name, description)
+        result = stuffs.new_text_property(name, description)
     elif type == "numeric":
-        stuffs.new_numeric_property(name, description)
+        result = stuffs.new_numeric_property(name, description)
     else:
         return redirect("error.html", message="you did a funny")
+
+    if result[0]:
+        return redirect("/admin")
+    else:
+        return render_template("error.html", message=result[1])
+
+
+@app.route("/attachtextproperty", methods=["POST"])
+def attach_text_property():
+    print(request.form)
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
+    stuff_id = request.form["stuff_id"]
+    property_id = request.form["property_id"]
+    text = request.form["text"]
+
+    result = stuffs.attach_text_property(stuff_id, property_id, text)
+    print(result)
+    if not result[0]:
+        return render_template("error.html", message=result[1])
+
+    return redirect(f"/stuff/{stuff_id}")
+
+
+@app.route("/attachnumericproperty", methods=["POST"])
+def attach_numeric_property():
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
+    stuff_id = request.form["stuff_id"]
+    property_id = request.form["property_id"]
+    number = request.form["number"]
+
+    result = stuffs.attach_numeric_property(stuff_id, property_id, number)
+    if not result[0]:
+        return render_template("error.html", message=result[1])
+
+    return redirect(f"/stuff/{stuff_id}")
 
 
 @app.route("/stuff/<int:id>")
@@ -88,8 +127,17 @@ def stuff(id):
 
     info = stuffs.get_information(id)
     rev_info = stuffs.get_reverse_information(id)
+    stuff_text_props = stuffs.get_stuff_text_properties(id)
+    stuff_num_props = stuffs.get_stuff_numeric_properties(id)
+    stuff_props = stuff_text_props + stuff_num_props
+    text_props = stuffs.get_text_properties()[1]
+    num_props = stuffs.get_numeric_properties()[1]
+
     return render_template("stuff.html", stuff=stuff,
-                           info=info, rev_info=rev_info)
+                           info=info, rev_info=rev_info,
+                           stuff_props=stuff_props,
+                           text_props=text_props,
+                           num_props=num_props)
 
 
 @app.route("/newinformation", methods=["POST"])
