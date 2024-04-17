@@ -11,8 +11,7 @@ CREATE TABLE Admins (
 CREATE TABLE Stuffs (
     id SERIAL PRIMARY KEY,
     owner INTEGER REFERENCES Users ON DELETE CASCADE,
-    name TEXT,
-    description TEXT
+    name TEXT
 );
 
 CREATE TABLE Informations (
