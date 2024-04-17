@@ -5,23 +5,16 @@
 <p>{{stuff.description}}</p>
 
 {% if info %}
-<table>
-  <tr>
-    <th>id</th>
-    <th>name</th>
-    <th>description</th>
-    <th>connection</th>
-  </tr>
-
+<div class="informations">
   {% for i in info %}
-  <tr>
-    <td><a href='{{"/stuff/%s" % i[0]}}'>{{i[0]}}</a></td>
-    <td>{{i[1]}}</td>
-    <td>{{i[2]}}</td>
-    <td>{{i[3]}}</td>
-  </tr>
+  <div class="information">
+    <div class="info-box"><a href='{{"/stuff/%s" % i[0]}}'>#{{i[0]}}</a></div>
+    <div class="info-box">{{i[1]}}</div>
+    <div class="info-box">{{i[2]}}</div>
+    <div class="info-box">{{i[3]}}</div>
+  </div>
   {% endfor %}
-</table>
+</div>
 {% endif %}
 
 
@@ -63,58 +56,64 @@
   <input type="submit" value="New stuff">
 </form>
 
-{% if stuff_props %}
-<table>
-  <tr>
-    <th>name</th>
-    <th>value</th>
-  </tr>
+<div class="properties">
+  {% if stuff_props %}
+  <div class="existing-properties">
+    <div class="property-column">
+      {% for i in range(stuff_props | length) %}
+      <div class="property-box">{{stuff_props[i][0]}}</div>
+      {% endfor %}
+    </div>
+    <div class="property-column">
+      {% for i in range(stuff_props | length) %}
+      <div class="property-box">{{stuff_props[i][1]}}</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
-  {% for p in stuff_props %}
-  <tr>
-    <td>{{p[0]}}</td>
-    <td>{{p[1]}}</td>
-  </tr>
-  {% endfor %}
-</table>
-{% endif %}
+  <div class="new-properties">
+    <div class="property-form" <p>New text property
+      <p>
+      <form action="/attachtextproperty" method="POST">
+        <label for="property_id">Choose a property</label>
+        <select name="property_id" id="property_id">
+          <option value="">Choose a property</option>
+          {% for t in text_props %}
+          <option value={{t[0]}}>{{t[1]}}
+            {% endfor %}
+        </select>
 
-<p>New text property
-<p>
-<form action="/attachtextproperty" method="POST">
-  <label for="property_id">Choose a property</label>
-  <select name="property_id" id="property_id">
-    <option value="">Choose a property</option>
-    {% for t in text_props %}
-    <option value={{t[0]}}>{{t[1]}}
-  </select>
-  {% endfor %}
+        <p>Text:<br>
+          <input type="text" name="text">
+        </p>
+        <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        <input type="submit" value="New property">
+      </form>
+    </div>
 
-  <p>Text:<br>
-    <input type="text" name="text">
-  </p>
-  <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
-  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-  <input type="submit" value="New property">
-</form>
+    <div class="property-form" <p>New numeric property
+      <p>
+      <form action="/attachnumericproperty" method="POST">
+        <label for="property_id">Choose a property</label>
+        <select name="property_id" id="property_id">
+          <option value="">Choose a property</option>
+          {% for t in num_props %}
+          <option value={{t[0]}}>{{t[1]}}
+            {% endfor %}
+        </select>
 
-<p>New numeric property
-<p>
-<form action="/attachnumericproperty" method="POST">
-  <label for="property_id">Choose a property</label>
-  <select name="property_id" id="property_id">
-    <option value="">Choose a property</option>
-    {% for t in num_props %}
-    <option value={{t[0]}}>{{t[1]}}
-  </select>
-  {% endfor %}
+        <p>Number:<br>
+          <input type="number" name="number">
+        </p>
+        <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        <input type="submit" value="New property">
+      </form>
+    </div>
 
-  <p>Number:<br>
-    <input type="number" name="number">
-  </p>
-  <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
-  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-  <input type="submit" value="New property">
-</form>
+  </div>
 
-{% endblock %}
+
+  {% endblock %}

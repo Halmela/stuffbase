@@ -54,7 +54,7 @@ def get_stuff_text_properties(stuff_id):
     sql = text("""
             SELECT I.name, P.text
             FROM Text_property_informations I, Text_properties P
-            WHERE P.stuff_id = stuff_id AND P.property_id = I.id
+            WHERE P.stuff_id = :stuff_id AND P.property_id = I.id
         """)
     result = db.session.execute(sql, {"stuff_id": stuff_id})
 
@@ -65,7 +65,7 @@ def get_stuff_numeric_properties(stuff_id):
     sql = text("""
             SELECT I.name, P.number
             FROM Numeric_property_informations I, Numeric_properties P
-            WHERE P.stuff_id = stuff_id AND P.property_id = I.id
+            WHERE P.stuff_id = :stuff_id AND P.property_id = I.id
         """)
     result = db.session.execute(sql, {"stuff_id": stuff_id})
 

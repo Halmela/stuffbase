@@ -1,0 +1,51 @@
+.informations {
+  display: flex;
+  flex-direction: column;
+}
+
+.information {
+  display: flex;
+  padding: 10px;
+}
+
+.info-box {
+  outline: solid red;
+  padding: 10px;
+}
+
+.properties {
+  display: flex;
+  flex-direction: column;
+  max-width: 38.2%;
+  outline: solid gray;
+}
+
+.existing-properties {
+  display: flex;
+  flex-grow: 1;
+}
+
+.property-column {
+  display: flex;
+  flex-direction: column;
+  padding: 0.2%;
+  flex-grow: 1;
+}
+
+.property-box {
+  outline: solid red;
+  padding: 10px;
+  flex-grow: 1;
+}
+
+.new-properties {
+  display: flex;
+  flex-direction: column;
+  padding: 0.2%;
+  flex-grow: 1;
+}
+
+.property-form {
+  padding: 10px;
+  outline: solid black;
+}
