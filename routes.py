@@ -6,7 +6,7 @@ import users, stuffs
 @app.route("/")
 def index():
     if "root_id" in session:
-        root_info = stuffs.get_information(session["root_id"])
+        root_info = stuffs.get_relations(session["root_id"])
         print(root_info)
         return render_template("index.html", root_info=root_info)
     else:
@@ -125,8 +125,11 @@ def stuff(id):
         return render_template("error.html",
                                message=f"you do not have stuff with id {id}")
 
-    info = stuffs.get_information(id)
-    rev_info = stuffs.get_reverse_information(id)
+    info = stuffs.get_relations(id)
+    rev_info = stuffs.get_reverse_relations(id)
+    root_attached = any(filter(lambda x: x[0] == session["root_id"],
+                               rev_info))
+    rev_info = list(filter(lambda x: x[0] != session["root_id"], rev_info))
     stuff_text_props = stuffs.get_stuff_text_properties(id)
     stuff_num_props = stuffs.get_stuff_numeric_properties(id)
     stuff_props = stuff_text_props + stuff_num_props
@@ -134,23 +137,26 @@ def stuff(id):
     num_props = stuffs.get_numeric_properties()[1]
 
     return render_template("stuff.html", stuff=stuff,
-                           info=info, rev_info=rev_info,
+                           relations=info,
+                           reverse_relations=rev_info,
+                           root_attached=root_attached,
                            stuff_props=stuff_props,
                            text_props=text_props,
                            num_props=num_props)
 
 
-@app.route("/newinformation", methods=["POST"])
+@app.route("/newrelation", methods=["POST"])
 def new_info():
+
+    print(request.form)
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
 
     new_name = request.form["name"]
-    new_description = request.form["description"]
-    info_description = request.form["information"]
+    relation = request.form["relation"]
     stuff_id = request.form["stuff_id"]
-    result = stuffs.new_information(new_name, new_description,
-                                    info_description, stuff_id)
+    result = stuffs.new_relation(new_name,
+                                 relation, stuff_id)
 
     if result[0]:
         return redirect(f"/stuff/{stuff_id}")
@@ -164,8 +170,7 @@ def new_rootstuff():
         abort(403)
 
     name = request.form["name"]
-    description = request.form["description"]
-    result = stuffs.new_information(name, description, "", session["root_id"])
+    result = stuffs.new_relation(name, "", session["root_id"])
 
     if result[0]:
         return redirect("/")

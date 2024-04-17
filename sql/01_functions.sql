@@ -1,14 +1,13 @@
-CREATE OR REPLACE FUNCTION check_information_ownership() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION check_relation_ownership() RETURNS TRIGGER AS $$
 DECLARE
-    info_owner INTEGER;
-    stuff1_owner INTEGER;
-    stuff2_owner INTEGER;
+    relation_owner INTEGER;
+    relator_owner INTEGER;
+    relatee_owner INTEGER;
 BEGIN
-    SELECT owner INTO info_owner FROM Informations WHERE id = NEW.info_id;
-    SELECT owner INTO stuff1_owner FROM Stuffs WHERE id = NEW.stuff;
-    SELECT owner INTO stuff2_owner FROM Stuffs WHERE id = NEW.information;
+    SELECT owner INTO relator_owner FROM Stuffs WHERE id = NEW.relator;
+    SELECT owner INTO relatee_owner FROM Stuffs WHERE id = NEW.relatee;
 
-    IF NOT (stuff1_owner = stuff2_owner AND stuff1_owner = info_owner) THEN
+    IF NOT (relator_owner = relatee_owner AND relator_owner = NEW.owner) THEN
         RAISE EXCEPTION 'Ownerships do not match.';
     END IF;
 

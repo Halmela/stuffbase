@@ -11,7 +11,7 @@ def get_root():
 
 def get_stuff(stuff_id):
     sql = text("""
-        SELECT id, name, description, owner
+        SELECT id, name
         FROM Stuffs
         WHERE id=:stuff_id AND owner=:user_id
     """)
@@ -20,30 +20,30 @@ def get_stuff(stuff_id):
     return result.fetchone()
 
 
-def get_information(stuff_id):
+def get_relations(stuff_id):
     sql = text("""
-            SELECT DISTINCT S.id, S.name, S.description, I.description
-            FROM Informations I, Stuffs S
-                JOIN InformationRelations IR
-                ON S.id = IR.information
-            WHERE IR.stuff = :stuff_id
+            SELECT DISTINCT S.id, S.name, RI.description
+            FROM Relation_informations RI, Stuffs S
+                JOIN Relations R
+                ON S.id = R.relatee
+            WHERE R.relator = :stuff_id
                 AND S.owner=:user_id
-                AND I.id = IR.info_id
+                AND R.info_id = RI.id
         """)
     result = db.session.execute(sql, {"stuff_id": stuff_id,
                                       "user_id": session["user_id"]})
     return result.fetchall()
 
 
-def get_reverse_information(stuff_id):
+def get_reverse_relations(stuff_id):
     sql = text("""
-            SELECT DISTINCT S.id, S.name, S.description, I.description
-            FROM Informations I, Stuffs S
-                JOIN InformationRelations IR
-                ON S.id = IR.stuff
-            WHERE IR.information = :stuff_id
+            SELECT DISTINCT S.id, S.name, RI.description
+            FROM Relation_informations RI, Stuffs S
+                JOIN Relations R
+                ON S.id = R.relator
+            WHERE R.relatee = :stuff_id
                 AND S.owner=:user_id
-                AND I.id = IR.info_id
+                AND R.info_id = RI.id
         """)
     result = db.session.execute(sql, {"stuff_id": stuff_id,
                                       "user_id": session["user_id"]})
@@ -72,22 +72,21 @@ def get_stuff_numeric_properties(stuff_id):
     return result.fetchall()
 
 
-def new_rootstuff(name, description):
+def new_rootstuff(name):
     try:
         sql = text("""
-                INSERT INTO Stuffs (name, description, owner)
-                VALUES (:name, :description, :owner)
+                INSERT INTO Stuffs (name, owner)
+                VALUES (:name, :owner)
                 RETURNING id
             """)
         result = db.session.execute(sql, {"name": name,
-                                          "description": description,
                                           "owner": session["user_id"]})
         sql = text("""
-                INSERT INTO Informations (stuff, information, owner)
-                VALUES (:stuff, :information, :owner)
+                INSERT INTO Relations (relator, relatee, owner)
+                VALUES (:relator, :relatee, :owner)
             """)
-        db.session.execute(sql, {"stuff": session["root_id"],
-                                 "information": result.scalar(),
+        db.session.execute(sql, {"relator": session["root_id"],
+                                 "relatee": result.scalar(),
                                  "owner": session["user_id"]})
         db.session.commit()
         return (True, "")
@@ -97,15 +96,14 @@ def new_rootstuff(name, description):
 
 # returns (True, int) or (False, str)
 # as in (True, stuff_id) or (False, error message)
-def new_stuff(name, description):
+def new_stuff(name):
     try:
         sql = text("""
-                INSERT INTO Stuffs (name, description, owner)
-                VALUES (:name, :description, :owner)
+                INSERT INTO Stuffs (name, owner)
+                VALUES (:name, :owner)
                 RETURNING id
             """)
         result = db.session.execute(sql, {"name": name,
-                                          "description": description,
                                           "owner": session["user_id"]})
         id = result.scalar()
         db.session.commit()
@@ -114,34 +112,33 @@ def new_stuff(name, description):
         return (False, e)
 
 
-def new_information(new_name, new_description, info_description, stuff_id):
-    info_id = new_stuff(new_name, new_description)
-    if not info_id[0]:
-        return info_id
+def new_relation(new_name, relation_description, stuff_id):
+    relatee_id = new_stuff(new_name)
+    if not relatee_id[0]:
+        return relatee_id
 
-    return attach_information(stuff_id, info_id[1], info_description)
+    return attach_relation(stuff_id, relatee_id[1], relation_description)
 
 
-def attach_information(stuff_id, information_id, description):
+def attach_relation(relator_id, relatee_id, description):
     try:
         sql = text("""
-                INSERT INTO Informations (description, owner)
-                VALUES (:description, :owner)
+                INSERT INTO Relation_informations (description)
+                VALUES (:description)
                 RETURNING id
             """)
         result = db.session.execute(sql,
-                                    {"description": description,
-                                     "owner": session["user_id"]})
+                                    {"description": description})
         info_id = result.scalar()
 
         sql = text("""
-                INSERT INTO InformationRelations (info_id, stuff, information)
-                VALUES (:info_id, :stuff, :information)
+                INSERT INTO Relations (info_id, relator, relatee)
+                VALUES (:info_id, :relator, :relatee)
             """)
         db.session.execute(sql,
                            {"info_id": info_id,
-                            "stuff": stuff_id,
-                            "information": information_id
+                            "relator": relator_id,
+                            "relatee": relatee_id
                             })
 
         db.session.commit()

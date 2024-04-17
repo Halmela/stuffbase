@@ -48,8 +48,8 @@ def create_user(username, password):
 
         # user is not logged at this point, so we can't use stuffs.new_stuff()
         sql = text("""
-            INSERT INTO Stuffs (name, description, owner)
-            VALUES (:username, '', :owner)
+            INSERT INTO Stuffs (name, owner)
+            VALUES (:username, :owner)
             RETURNING id
             """)
         result = db.session.execute(sql, {"username": username,

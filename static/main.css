@@ -1,16 +1,68 @@
-.informations {
+.stuff {
+  display: flex;
+}
+
+.relations {
+  display: flex;
+  flex-direction: column;
+  max-width: 38.2%;
+  outline: solid gray;
+}
+
+.existing-relations {
+  display: flex;
+}
+
+.relatees {
   display: flex;
   flex-direction: column;
 }
 
-.information {
+.relators {
   display: flex;
+  flex-direction: column;
+}
+
+.stuff-as-relator {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  outline: solid green;
   padding: 10px;
 }
 
-.info-box {
+.stuff-as-relatee {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  outline: solid green;
+  padding: 10px;
+}
+
+.relation {
+  display: flex;
+  padding: 10px;
+  outline: solid gray;
+
+}
+
+.rela-box {
   outline: solid red;
   padding: 10px;
+}
+
+.new-relations {
+  display: flex;
+  flex-direction: column;
+  padding: 0.2%;
+  flex-grow: 1;
+}
+
+.relation-form {
+  padding: 10px;
+  outline: solid black;
 }
 
 .properties {

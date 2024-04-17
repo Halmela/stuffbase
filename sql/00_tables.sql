@@ -14,17 +14,17 @@ CREATE TABLE Stuffs (
     name TEXT
 );
 
-CREATE TABLE Informations (
+CREATE TABLE Relation_informations (
     id SERIAL PRIMARY KEY,
-    description TEXT,
-    owner INTEGER REFERENCES Users ON DELETE CASCADE
+    description TEXT
 );
 
 
-CREATE TABLE InformationRelations (
-    info_id INTEGER REFERENCES Informations ON DELETE CASCADE,
-    stuff INTEGER REFERENCES Stuffs ON DELETE CASCADE,
-    information INTEGER REFERENCES Stuffs ON DELETE CASCADE
+CREATE TABLE Relations (
+    info_id INTEGER REFERENCES Relation_informations ON DELETE CASCADE,
+    relator INTEGER REFERENCES Stuffs ON DELETE CASCADE,
+    relatee INTEGER REFERENCES Stuffs ON DELETE CASCADE,
+    owner INTEGER REFERENCES Users ON DELETE CASCADE
 );
 
 CREATE TABLE Roots (

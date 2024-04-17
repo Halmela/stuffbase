@@ -7,14 +7,12 @@
   <tr>
     <th>id</th>
     <th>name</th>
-    <th>description</th>
   </tr>
 
   {% for stuff in root_info %}
   <tr>
     <td><a href='{{"/stuff/%s" % stuff[0]}}'>{{stuff[0]}}</a></td>
     <td>{{stuff[1]}}</td>
-    <td>{{stuff[2]}}</td>
   </tr>
   {% endfor %}
 
@@ -24,9 +22,6 @@
 <form action="/newrootstuff" method="POST">
   <p>Name:<br>
     <input type="text" name="name">
-  </p>
-  <p>Description:<br>
-    <input type="text" name="description">
   </p>
   <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
   <input type="submit" value="New stuff">

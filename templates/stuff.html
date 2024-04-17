@@ -2,117 +2,121 @@
 {% block title %}{{ stuff.name }}{% endblock %}
 {% block content %}
 <h2>{{stuff.name}}</h2>
-<p>{{stuff.description}}</p>
-
-{% if info %}
-<div class="informations">
-  {% for i in info %}
-  <div class="information">
-    <div class="info-box"><a href='{{"/stuff/%s" % i[0]}}'>#{{i[0]}}</a></div>
-    <div class="info-box">{{i[1]}}</div>
-    <div class="info-box">{{i[2]}}</div>
-    <div class="info-box">{{i[3]}}</div>
-  </div>
-  {% endfor %}
-</div>
+{% if root_attached %}
+<p>is attached to root</p>
 {% endif %}
 
-
-{% if rev_info %}
-<h3>Information of</h3>
-<table>
-  <tr>
-    <th>id</th>
-    <th>name</th>
-    <th>description</th>
-    <th>connection</th>
-  </tr>
-
-  {% for i in rev_info %}
-  <tr>
-    <td><a href='{{"/stuff/%s" % i[0]}}'>{{i[0]}}</a></td>
-    <td>{{i[1]}}</td>
-    <td>{{i[2]}}</td>
-    <td>{{i[3]}}</td>
-  </tr>
-  {% endfor %}
-</table>
-{% endif %}
-
-<p>Insert new information here
-<p>
-<form action="/newinformation" method="POST">
-  <p>Name:<br>
-    <input type="text" name="name">
-  </p>
-  <p>Description:<br>
-    <input type="text" name="description">
-  </p>
-  <p>Information description:<br>
-    <input type="text" name="information">
-  </p>
-  <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
-  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-  <input type="submit" value="New stuff">
-</form>
-
-<div class="properties">
-  {% if stuff_props %}
-  <div class="existing-properties">
-    <div class="property-column">
-      {% for i in range(stuff_props | length) %}
-      <div class="property-box">{{stuff_props[i][0]}}</div>
-      {% endfor %}
+<div class="stuff">
+  <div class="relations">
+    {% if relations %}
+    <div class="existing-relations">
+      <div class="stuff-as-relator">
+        <p>{{stuff.name}}</p>
+      </div>
+      <div class="relatees">
+        {% for r in relations %}
+        <div class="relation">
+          <div class="rela-box">{{r[2]}}</div>
+          <div class="rela-box"><a href='{{"/stuff/%s" % r[0]}}'>{{r[1]}}</a></div>
+        </div>
+        {% endfor %}
+      </div>
     </div>
-    <div class="property-column">
-      {% for i in range(stuff_props | length) %}
-      <div class="property-box">{{stuff_props[i][1]}}</div>
-      {% endfor %}
+    {% endif %}
+
+    {% if reverse_relations %}
+    <div class="existing-relations">
+      <div class="relators">
+        {% for r in reverse_relations %}
+        <div class="relation">
+          <div class="rela-box"><a href='{{"/stuff/%s" % r[0]}}'>{{r[1]}}</a></div>
+          <div class="rela-box">{{r[2]}}</div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="stuff-as-relatee">
+        <p>{{stuff.name}}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="new-relations">
+      <div class="relation-form">
+        <p>Insert new relation here
+        <p>
+        <form action="/newrelation" method="POST">
+          <p>Name:<br>
+            <input type="text" name="name">
+          </p>
+          <p>Relation description:<br>
+            <input type="text" name="relation">
+          </p>
+          <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+          <input type="submit" value="New stuff">
+        </form>
+      </div>
     </div>
   </div>
-  {% endif %}
 
-  <div class="new-properties">
-    <div class="property-form" <p>New text property
-      <p>
-      <form action="/attachtextproperty" method="POST">
-        <label for="property_id">Choose a property</label>
-        <select name="property_id" id="property_id">
-          <option value="">Choose a property</option>
-          {% for t in text_props %}
-          <option value={{t[0]}}>{{t[1]}}
-            {% endfor %}
-        </select>
-
-        <p>Text:<br>
-          <input type="text" name="text">
-        </p>
-        <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
-        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-        <input type="submit" value="New property">
-      </form>
+  <div class="properties">
+    {% if stuff_props %}
+    <div class="existing-properties">
+      <div class="property-column">
+        {% for i in range(stuff_props | length) %}
+        <div class="property-box">{{stuff_props[i][0]}}</div>
+        {% endfor %}
+      </div>
+      <div class="property-column">
+        {% for i in range(stuff_props | length) %}
+        <div class="property-box">{{stuff_props[i][1]}}</div>
+        {% endfor %}
+      </div>
     </div>
+    {% endif %}
 
-    <div class="property-form" <p>New numeric property
-      <p>
-      <form action="/attachnumericproperty" method="POST">
-        <label for="property_id">Choose a property</label>
-        <select name="property_id" id="property_id">
-          <option value="">Choose a property</option>
-          {% for t in num_props %}
-          <option value={{t[0]}}>{{t[1]}}
-            {% endfor %}
-        </select>
+    <div class="new-properties">
+      <div class="property-form" <p>New text property
+        <p>
+        <form action="/attachtextproperty" method="POST">
+          <label for="property_id">Choose a property</label>
+          <select name="property_id" id="property_id">
+            <option value="">Choose a property</option>
+            {% for t in text_props %}
+            <option value={{t[0]}}>{{t[1]}}
+              {% endfor %}
+          </select>
 
-        <p>Number:<br>
-          <input type="number" name="number">
-        </p>
-        <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
-        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-        <input type="submit" value="New property">
-      </form>
+          <p>Text:<br>
+            <input type="text" name="text">
+          </p>
+          <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+          <input type="submit" value="New property">
+        </form>
+      </div>
+
+      <div class="property-form" <p>New numeric property
+        <p>
+        <form action="/attachnumericproperty" method="POST">
+          <label for="property_id">Choose a property</label>
+          <select name="property_id" id="property_id">
+            <option value="">Choose a property</option>
+            {% for t in num_props %}
+            <option value={{t[0]}}>{{t[1]}}
+              {% endfor %}
+          </select>
+
+          <p>Number:<br>
+            <input type="number" name="number">
+          </p>
+          <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+          <input type="submit" value="New property">
+        </form>
+      </div>
+
     </div>
-
   </div>
 
 
