@@ -2,25 +2,54 @@
 Database for logging information on stuff. 
 
 ## CURRENT STATE
-### How to run
+### installation
 Install postgresql (I use 14.11) with your preferred method and give your user permission to create databases.
+If your user doesn't have permissions to create a database, do so with command
 
+```
+sudo -u postgres createdb -O [user] stuffbase
+```
+
+`sql/init_db.bash` will ask if you want to recreate database. Answer y to that.
+
+
+#### Automated
 ```
 ./init.bash
-./run.bash
 ```
 
+#### Manual
+Check how `init.bash` and `sql/init_db.bash` works.
+`init.bash` will create a virtual environment, install dependencies, run `sql/init_db.bash` and create a environment file.
+`sql/init_db.bash` will run every sql-command found in sql-directory.
+You can achieve this manually with command `psql -d stuffbase < [sql-file]`
+ 
+Running 03_properties.sql and 04_relations.sql are optional, but these will define few standard properties and relations.
+
+
 ### usage
+```
+# Activate virtual environment
+source venv/bin/activate
+# start server
+flask run
+```
+
+`./run.bash` will do the same
+
+
 
 You can add stuff to root and give them names.
 If you want to add properties, you can do so in stuff's page.
 There you can also add new relations to it.
-If you want to add a relatin between two existing stuffs, you can use the other stuff's #id.
+If you want to add a relation between two existing stuffs, you can use the other stuff's #id instead of a new name.
+If for a relation xRy exists a converse relation, a relation yCx will also be created.
 
 #### admin
 
 First user that goes to /admin page becomes an admin.
 Admins can create describe new properties and relations.
+
 
 
 ## INITIAL THOUGHTS
