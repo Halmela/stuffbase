@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}{{ stuff.name }}{% endblock %}
 {% block content %}
-<h2>{{stuff.name}}</h2>
+<h2>#{{stuff.id}} {{stuff.name}}</h2>
 {% if root_attached %}
 <p>is attached to root</p>
 {% endif %}
@@ -43,15 +43,20 @@
     <div class="new-relations">
       <div class="relation-form">
         <p>Insert new relation here
-        <p>
-        <form action="/newrelation" method="POST">
-          <p>Name:<br>
+        </p>
+        <form action="/attachrelation" method="POST">
+          <label for="info_id">Choose a property</label>
+          <select name="info_id" id="info_id">
+            <option value="">Choose a relation</option>
+            {% for r in rel_infos %}
+            <option value={{r[0]}}>{{r[1]}}
+              {% endfor %}
+          </select>
+
+          <p>Stuff (you can also use #id):<br>
             <input type="text" name="name">
           </p>
-          <p>Relation description:<br>
-            <input type="text" name="relation">
-          </p>
-          <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+          <input type="hidden" name="relator_id" value="{{ stuff.id }}">
           <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
           <input type="submit" value="New stuff">
         </form>

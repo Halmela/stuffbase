@@ -1,6 +1,21 @@
 {% extends "layout.html" %}
 {% block title %}{{ Admin }}{% endblock %}
 {% block content %}
+<p>Create new relation</p>
+<form action="/newrelation" method="POST">
+  <p>Description:<br>
+    <input type="text" name="description">
+  </p>
+  <div>
+    <p>Optional converse relation</p>
+    <p>Description:<br>
+      <input type="text" name="converse-description">
+    </p>
+  </div>
+  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+  <input type="submit" value="Create">
+</form>
+
 <p>Create new property</p>
 <form action="/newproperty" method="POST">
   <p>Name:<br>

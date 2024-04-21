@@ -54,6 +54,20 @@ def login():
             return render_template("error.html", message=logged[1])
 
 
+@app.route("/newrelation", methods=["POST"])
+def new_relation():
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
+    description = request.form["description"]
+    converse_description = request.form["converse-description"]
+
+    result = stuffs.new_relation(description, converse_description)
+    if result[0]:
+        return redirect("/admin")
+    return render_template("error.html", message=result[0])
+
+
 @app.route("/newproperty", methods=["POST"])
 def new_property():
     if session["csrf_token"] != request.form["csrf_token"]:
@@ -135,6 +149,8 @@ def stuff(id):
     stuff_props = stuff_text_props + stuff_num_props
     text_props = stuffs.get_text_properties()[1]
     num_props = stuffs.get_numeric_properties()[1]
+    rel_infos = stuffs.get_relation_informations()
+    print(rel_infos)
 
     return render_template("stuff.html", stuff=stuff,
                            relations=info,
@@ -142,24 +158,34 @@ def stuff(id):
                            root_attached=root_attached,
                            stuff_props=stuff_props,
                            text_props=text_props,
-                           num_props=num_props)
+                           num_props=num_props,
+                           rel_infos=rel_infos)
 
 
-@app.route("/newrelation", methods=["POST"])
-def new_info():
-
+@app.route("/attachrelation", methods=["POST"])
+def attach_relation():
     print(request.form)
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
 
+    info_id = request.form["info_id"]
+    relator = request.form["relator_id"]
     new_name = request.form["name"]
-    relation = request.form["relation"]
-    stuff_id = request.form["stuff_id"]
-    result = stuffs.new_relation(new_name,
-                                 relation, stuff_id)
+
+    if not new_name:
+        return render_template("error.html", message="empty relatee")
+    if new_name[0] == '#':
+        relatee = (True, new_name[1:])
+    else:
+        relatee = stuffs.new_stuff(new_name)
+
+    if relatee[0]:
+        result = stuffs.attach_relation(info_id, relator, relatee[1])
+    else:
+        return render_template("error.html", message=relatee[1])
 
     if result[0]:
-        return redirect(f"/stuff/{stuff_id}")
+        return redirect(f"/stuff/{relator}")
     else:
         return render_template("error.html", message=result[1])
 
@@ -170,7 +196,11 @@ def new_rootstuff():
         abort(403)
 
     name = request.form["name"]
-    result = stuffs.new_relation(name, "", session["root_id"])
+    stuff_id = stuffs.new_stuff(name)
+    if stuff_id[0]:
+        result = stuffs.attach_relation(1, session["root_id"], stuff_id[1])
+    else:
+        return render_template("error.html", message=stuff_id[1])
 
     if result[0]:
         return redirect("/")

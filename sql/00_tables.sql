@@ -24,8 +24,16 @@ CREATE TABLE Relations (
     info_id INTEGER REFERENCES Relation_informations ON DELETE CASCADE,
     relator INTEGER REFERENCES Stuffs ON DELETE CASCADE,
     relatee INTEGER REFERENCES Stuffs ON DELETE CASCADE,
-    owner INTEGER REFERENCES Users ON DELETE CASCADE
+    owner INTEGER REFERENCES Users ON DELETE CASCADE,
+    converse_created BOOLEAN DEFAULT FALSE,
+    UNIQUE (info_id, relator, relatee, owner)
 );
+
+CREATE TABLE Converse_relations (
+    x_id INTEGER REFERENCES Relation_informations ON DELETE CASCADE,
+    y_id INTEGER REFERENCES Relation_informations ON DELETE CASCADE
+);
+
 
 CREATE TABLE Roots (
     owner INTEGER REFERENCES Users ON DELETE CASCADE,

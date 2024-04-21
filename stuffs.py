@@ -50,6 +50,16 @@ def get_reverse_relations(stuff_id):
     return result.fetchall()
 
 
+def get_relation_informations():
+    sql = text("""
+            SELECT id, description
+            FROM Relation_informations
+            WHERE NOT (id = 1 OR id = 2)
+        """)
+    result = db.session.execute(sql)
+    return result.fetchall()
+
+
 def get_stuff_text_properties(stuff_id):
     sql = text("""
             SELECT I.name, P.text
@@ -112,25 +122,31 @@ def new_stuff(name):
         return (False, e)
 
 
-def new_relation(new_name, relation_description, stuff_id):
-    relatee_id = new_stuff(new_name)
-    if not relatee_id[0]:
-        return relatee_id
-
-    return attach_relation(stuff_id, relatee_id[1], relation_description)
-
-
-def attach_relation(relator_id, relatee_id, description):
+def new_relation(description, converse_description):
     try:
-        sql = text("""
-                INSERT INTO Relation_informations (description)
-                VALUES (:description)
-                RETURNING id
-            """)
-        result = db.session.execute(sql,
-                                    {"description": description})
-        info_id = result.scalar()
+        if converse_description:
+            sql = text("""
+                    SELECT create_converse_relations(:description,
+                                                    :converse_description)
+                """)
+        else:
+            sql = text("""
+                    INSERT INTO Relation_informations (description)
+                    VALUES (:description)
+                """)
 
+        db.session.execute(sql,
+                           {"description": description,
+                            "converse_description": converse_description
+                            })
+        db.session.commit()
+        return (True, None)
+    except Exception as e:
+        return (False, e)
+
+
+def attach_relation(info_id, relator_id, relatee_id):
+    try:
         sql = text("""
                 INSERT INTO Relations (info_id, relator, relatee)
                 VALUES (:info_id, :relator, :relatee)
