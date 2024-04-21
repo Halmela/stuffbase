@@ -11,9 +11,16 @@ Install postgresql (I use 14.11) with your preferred method and give your user p
 ```
 
 ### usage
-create user and then add stuff to root.
-you can give stuff a description.
 
+You can add stuff to root and give them names.
+If you want to add properties, you can do so in stuff's page.
+There you can also add new relations to it.
+If you want to add a relatin between two existing stuffs, you can use the other stuff's #id.
+
+#### admin
+
+First user that goes to /admin page becomes an admin.
+Admins can create describe new properties and relations.
 
 
 ## INITIAL THOUGHTS

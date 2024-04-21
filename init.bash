@@ -19,8 +19,10 @@ source venv/bin/activate
 echo Install dependencies
 pip install -r ./requirements.txt
 
-echo Initialize database with name "stuffbase"
-sql/init.bash
+if ! sql/init_db.bash; then
+  echo try initializing again when you have created the database
+  exit 1
+fi
 
 echo lets create a base for .env file
 echo Is psql installed with local-pg script? y/n
