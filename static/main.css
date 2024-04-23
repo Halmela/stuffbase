@@ -1,52 +1,64 @@
 .stuff {
   display: flex;
+  flex-direction: row;
+  /* width: 61.8%; */
+  margin: auto;
+  outline: solid gray;
+}
+
+.stuff-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: auto;
+  width: 50%;
+  /* display: grid;
+  grid-column: repeat(3, 1fr); */
 }
 
 .relations {
   display: flex;
   flex-direction: column;
-  max-width: 38.2%;
-  outline: solid gray;
+  width: 25%;
 }
 
 .existing-relations {
   display: flex;
+  width: max;
 }
 
 .relatees {
   display: flex;
   flex-direction: column;
+  border-style: solid solid solid none;
+  border-color: blue;
+}
+
+.relatee {
+  display: flex;
+  justify-content: space-evenly;
+  flex-grow: 1;
+  padding: 10px;
+  width: max;
+  border-style: solid solid solid none;
 }
 
 .relators {
   display: flex;
   flex-direction: column;
+  border-style: solid none solid solid;
+  border-color: blue;
 }
 
-.stuff-as-relator {
+.relator {
+  display: flex;
+  justify-content: space-evenly;
   flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  outline: solid green;
   padding: 10px;
+  width: max;
+  border-style: solid none solid solid;
 }
 
-.stuff-as-relatee {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  outline: solid green;
-  padding: 10px;
-}
-
-.relation {
-  display: flex;
-  padding: 10px;
-  outline: solid gray;
-
-}
 
 .rela-box {
   outline: solid red;
@@ -57,24 +69,70 @@
   display: flex;
   flex-direction: column;
   padding: 0.2%;
-  flex-grow: 1;
+  width: fit-content;
 }
 
 .relation-form {
   padding: 10px;
-  outline: solid black;
+  border: solid black;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: fit-content;
+}
+
+.rel-text {
+  grid-column: 1 / span 4;
+}
+
+.rel-submit {
+  grid-row-start: 2;
+  grid-column-start: 5;
+}
+
+.rev-rel-text {
+  grid-column: 2 / span 4;
+}
+
+.rev-rel-submit {
+  grid-row-start: 2;
+  grid-column-start: 1;
 }
 
 .properties {
   display: flex;
   flex-direction: column;
-  max-width: 38.2%;
-  outline: solid gray;
+  width: fit-content;
+  border: solid gray;
+  margin: 20px;
 }
 
 .existing-properties {
   display: flex;
-  flex-grow: 1;
+  flex-direction: column;
+}
+
+.prop-item {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  border: solid green;
+  justify-items: stretch;
+  column-gap: 1%;
+}
+
+.prop-item h4 {
+  margin: auto;
+  padding: 5%;
+  grid-column: 1 / span 1;
+}
+
+.prop-item p {
+  padding: 1em;
+  margin: auto;
+  text-align: left;
+  word-break: break-word;
+  border-style: none none none solid;
+  grid-column: 2 / span 4;
+  width: 90%;
 }
 
 .property-column {
@@ -85,7 +143,7 @@
 }
 
 .property-box {
-  outline: solid red;
+  border: solid red;
   padding: 10px;
   flex-grow: 1;
 }
@@ -99,5 +157,22 @@
 
 .property-form {
   padding: 10px;
-  outline: solid black;
+  border: solid black;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: fit-content;
+}
+
+.prop-text {
+  grid-column: 2 / span 4;
+  grid-row: 1 / span 2;
+}
+
+.prop-select {
+  grid-column-start: 1;
+}
+
+.prop-submit {
+  grid-column-start: 1;
+  grid-row-start: 2;
 }
