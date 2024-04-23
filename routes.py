@@ -1,12 +1,12 @@
 from app import app
 from flask import render_template, request, redirect, session, abort
-import users, stuffs
+import users, stuffs, properties, relations
 
 
 @app.route("/")
 def index():
     if "root_id" in session:
-        root_info = stuffs.get_relations(session["root_id"])
+        root_info = relations.get_relations(session["root_id"])
         print(root_info)
         return render_template("index.html", root_info=root_info)
     else:
@@ -62,7 +62,7 @@ def new_relation():
     description = request.form["description"]
     converse_description = request.form["converse-description"]
 
-    result = stuffs.new_relation(description, converse_description)
+    result = relations.new_relation(description, converse_description)
     if result[0]:
         return redirect("/admin")
     return render_template("error.html", message=result[0])
@@ -83,9 +83,9 @@ def new_property():
         return redirect("error.html", message=admin[0])
 
     if type == "text":
-        result = stuffs.new_text_property(name, description)
+        result = properties.new_text_property(name, description)
     elif type == "numeric":
-        result = stuffs.new_numeric_property(name, description)
+        result = properties.new_numeric_property(name, description)
     else:
         return redirect("error.html", message="you did a funny")
 
@@ -105,7 +105,7 @@ def attach_text_property():
     property_id = request.form["property_id"]
     text = request.form["text"]
 
-    result = stuffs.attach_text_property(stuff_id, property_id, text)
+    result = properties.attach_text_property(stuff_id, property_id, text)
     print(result)
     if not result[0]:
         return render_template("error.html", message=result[1])
@@ -122,7 +122,7 @@ def attach_numeric_property():
     property_id = request.form["property_id"]
     number = request.form["number"]
 
-    result = stuffs.attach_numeric_property(stuff_id, property_id, number)
+    result = properties.attach_numeric_property(stuff_id, property_id, number)
     if not result[0]:
         return render_template("error.html", message=result[1])
 
@@ -139,17 +139,17 @@ def stuff(id):
         return render_template("error.html",
                                message=f"you do not have stuff with id {id}")
 
-    info = stuffs.get_relations(id)
-    rev_info = stuffs.get_reverse_relations(id)
+    info = relations.get_relations(id)
+    rev_info = relations.get_reverse_relations(id)
     root_attached = any(filter(lambda x: x[0] == session["root_id"],
                                rev_info))
     rev_info = list(filter(lambda x: x[0] != session["root_id"], rev_info))
-    stuff_text_props = stuffs.get_stuff_text_properties(id)
-    stuff_num_props = stuffs.get_stuff_numeric_properties(id)
+    stuff_text_props = properties.get_stuff_text_properties(id)
+    stuff_num_props = properties.get_stuff_numeric_properties(id)
     stuff_props = stuff_text_props + stuff_num_props
-    text_props = stuffs.get_text_properties()[1]
-    num_props = stuffs.get_numeric_properties()[1]
-    rel_infos = stuffs.get_relation_informations()
+    text_props = properties.get_text_properties()[1]
+    num_props = properties.get_numeric_properties()[1]
+    rel_infos = relations.get_relation_informations()
     print(rel_infos)
 
     return render_template("stuff.html", stuff=stuff,
@@ -180,7 +180,7 @@ def attach_relation():
         relatee = stuffs.new_stuff(new_name)
 
     if relatee[0]:
-        result = stuffs.attach_relation(info_id, relator, relatee[1])
+        result = relations.attach_relation(info_id, relator, relatee[1])
     else:
         return render_template("error.html", message=relatee[1])
 
@@ -198,7 +198,7 @@ def new_rootstuff():
     name = request.form["name"]
     stuff_id = stuffs.new_stuff(name)
     if stuff_id[0]:
-        result = stuffs.attach_relation(1, session["root_id"], stuff_id[1])
+        result = relations.attach_relation(1, session["root_id"], stuff_id[1])
     else:
         return render_template("error.html", message=stuff_id[1])
 
