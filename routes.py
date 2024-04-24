@@ -25,20 +25,20 @@ def admin():
     inexistant = users.admin_does_not_exist()
     print(inexistant)
     if not inexistant:
-        return render_template("error.html", message=inexistant)
+        return error("You are not an admin")
 
     success = users.promote_admin(session["user_id"])
     print(success)
 
     if not success:
-        return render_template("error.html", message=success)
+        return error(success)
 
     admin = users.is_admin(session["user_id"])
     print(admin)
     if admin:
         return render_template("admin.html")
     else:
-        return render_template("error.html", message=admin)
+        return error(admin)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -52,7 +52,7 @@ def login():
         if logged:
             return redirect("/")
         else:
-            return render_template("error.html", message=logged)
+            return error(logged)
 
 
 @app.route("/newrelation", methods=["POST"])
@@ -66,7 +66,7 @@ def new_relation():
     result = relations.new_relation(description, converse_description)
     if result:
         return redirect("/admin")
-    return render_template("error.html", message=result)
+    return error(result)
 
 
 @app.route("/newproperty", methods=["POST"])
@@ -81,19 +81,19 @@ def new_property():
     admin = users.is_admin(session["user_id"])
 
     if not admin:
-        return redirect("error.html", message=admin)
+        return error(admin)
 
     if type == "text":
         result = properties.new_text_property(name, description)
     elif type == "numeric":
         result = properties.new_numeric_property(name, description)
     else:
-        return redirect("error.html", message="you did a funny")
+        return error("you did a funny")
 
     if result:
         return redirect("/admin")
     else:
-        return render_template("error.html", message=result)
+        return error(result)
 
 
 @app.route("/attachtextproperty", methods=["POST"])
@@ -109,7 +109,7 @@ def attach_text_property():
     result = properties.attach_text_property(stuff_id, property_id, text)
     print(result)
     if not result:
-        return render_template("error.html", message=result)
+        return error(result)
 
     return redirect(f"/stuff/{stuff_id}")
 
@@ -125,7 +125,7 @@ def attach_numeric_property():
 
     result = properties.attach_numeric_property(stuff_id, property_id, number)
     if not result:
-        return render_template("error.html", message=result)
+        return error(result)
 
     return redirect(f"/stuff/{stuff_id}")
 
@@ -137,8 +137,7 @@ def stuff(id):
 
     stuff = stuffs.get_stuff(id)
     if not stuff:
-        return render_template("error.html",
-                               message=f"you do not have stuff with id {id}")
+        return error(f"you do not have stuff with id {id}")
 
     info = relations.get_relations(id)
     rev_info = relations.get_reverse_relations(id)
@@ -173,8 +172,8 @@ def attach_relation():
     relator = request.form["relator_id"]
     new_name = request.form["name"]
 
-    if not new_name:
-        return render_template("error.html", message="empty relatee")
+    if not (len(new_name) > 1 and len(new_name) < 20):
+        return error("length of name should be 2-20 chars")
     if new_name[0] == '#':
         relatee = Ok(new_name[1:])
     else:
@@ -183,12 +182,12 @@ def attach_relation():
     if relatee:
         result = relations.attach_relation(info_id, relator, relatee.value)
     else:
-        return render_template("error.html", message=relatee)
+        return error(relatee)
 
     if result:
         return redirect(f"/stuff/{relator}")
     else:
-        return render_template("error.html", message=result)
+        return error(result)
 
 
 @app.route("/newrootstuff", methods=["POST"])
@@ -202,12 +201,12 @@ def new_rootstuff():
         result = relations.attach_relation(1, session["root_id"],
                                            stuff_id.value)
     else:
-        return render_template("error.html", message=stuff_id)
+        return error(stuff_id)
 
     if result:
         return redirect("/")
     else:
-        return render_template("error.html", message=result)
+        return error(result)
 
 
 @app.route("/logout")
@@ -225,14 +224,18 @@ def register():
         password1 = request.form["password1"]
         password2 = request.form["password2"]
         if password1 != password2:
-            return render_template("error.html",
-                                   message="Passwords are not the same")
+            return error("Passwords are not the same")
+
         created = users.create_user(username, password1)
         if not created:
-            return render_template("error.html", message=created)
+            return error(created)
 
         logged = users.login(username, password1)
         if not logged:
-            return render_template("error.html", message=logged)
+            return error(logged)
 
         return redirect("/")
+
+
+def error(message):
+    return render_template("error.html", message=message)
