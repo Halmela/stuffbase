@@ -2,6 +2,7 @@ from db import db
 from sqlalchemy.sql import text
 from flask import session
 from stuffs import is_owner
+from result import Ok, Err
 
 
 def get_stuff_text_properties(stuff_id):
@@ -35,14 +36,14 @@ def new_text_property(name, description):
         db.session.execute(sql, {"name": name,
                                  "description": description})
         db.session.commit()
-        return (True, id)
+        return Ok(id)
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 def attach_text_property(stuff_id, property_id, prop_text):
     owner = is_owner(session["user_id"], stuff_id)
-    if not owner[0]:
+    if not owner:
         return owner
 
     try:
@@ -58,9 +59,9 @@ def attach_text_property(stuff_id, property_id, prop_text):
                             "text": prop_text})
         print("exec läpi")
         db.session.commit()
-        return (True, "")
+        return Ok(())
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 def new_numeric_property(name, description):
@@ -72,14 +73,14 @@ def new_numeric_property(name, description):
         db.session.execute(sql, {"name": name,
                                  "description": description})
         db.session.commit()
-        return (True, id)
+        return Ok(id)
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 def attach_numeric_property(stuff_id, property_id, number):
     owner = is_owner(session["user_id"], stuff_id)
-    if not owner[0]:
+    if not owner:
         return owner
 
     try:
@@ -92,9 +93,9 @@ def attach_numeric_property(stuff_id, property_id, number):
                             "property_id": property_id,
                             "number": number})
         db.session.commit()
-        return (True, "")
+        return Ok(())
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 def get_text_properties():
@@ -104,9 +105,9 @@ def get_text_properties():
                 FROM Text_property_informations
             """)
         result = db.session.execute(sql)
-        return (True, result.fetchall())
+        return Ok(result.fetchall())
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 def get_numeric_properties():
@@ -116,6 +117,6 @@ def get_numeric_properties():
                 FROM Numeric_property_informations
             """)
         result = db.session.execute(sql)
-        return (True, result.fetchall())
+        return Ok(result.fetchall())
     except Exception as e:
-        return (False, e)
+        return Err(e)

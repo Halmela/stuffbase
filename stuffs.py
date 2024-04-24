@@ -1,6 +1,7 @@
 from db import db
 from sqlalchemy.sql import text
 from flask import session
+from result import Ok, Err
 
 
 def get_root():
@@ -37,9 +38,9 @@ def new_rootstuff(name):
                                  "relatee": result.scalar(),
                                  "owner": session["user_id"]})
         db.session.commit()
-        return (True, "")
+        return Ok(())
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 # returns (True, int) or (False, str)
@@ -55,9 +56,9 @@ def new_stuff(name):
                                           "owner": session["user_id"]})
         id = result.scalar()
         db.session.commit()
-        return (True, id)
+        return Ok(id)
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 def is_owner(user_id, stuff_id):
@@ -70,6 +71,9 @@ def is_owner(user_id, stuff_id):
         result = db.session.execute(sql, {"stuff_id": stuff_id,
                                           "user_id": user_id})
         owner = bool(int(result.scalar()))
-        return (owner, "" if owner else "You are not the owner of that stuff")
+        if owner:
+            return Ok(())
+        else:
+            return Err("You are not the owner of that")
     except Exception as e:
-        return(False, e)
+        return Err(e)

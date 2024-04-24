@@ -1,6 +1,7 @@
 from db import db
 from sqlalchemy.sql import text
 from flask import session
+from result import Ok, Err
 
 
 def get_relations(stuff_id):
@@ -61,9 +62,9 @@ def new_relation(description, converse_description):
                             "converse_description": converse_description
                             })
         db.session.commit()
-        return (True, None)
+        return Ok(())
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 def attach_relation(info_id, relator_id, relatee_id):
@@ -79,6 +80,6 @@ def attach_relation(info_id, relator_id, relatee_id):
                             })
 
         db.session.commit()
-        return (True, info_id)
+        return Ok(info_id)
     except Exception as e:
-        return (False, e)
+        return Err(e)
