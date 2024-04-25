@@ -31,14 +31,14 @@ def admin():
     print(success)
 
     if not success:
-        return error(success)
+        return error(success.error)
 
     admin = users.is_admin(session["user_id"])
     print(admin)
     if admin:
         return render_template("admin.html")
     else:
-        return error(admin)
+        return error(admin.error)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -52,7 +52,7 @@ def login():
         if logged:
             return redirect("/")
         else:
-            return error(logged)
+            return error(logged.error)
 
 
 @app.route("/newrelation", methods=["POST"])
@@ -66,7 +66,7 @@ def new_relation():
     result = relations.new_relation(description, converse_description)
     if result:
         return redirect("/admin")
-    return error(result)
+    return error(result.error)
 
 
 @app.route("/newproperty", methods=["POST"])
@@ -81,7 +81,7 @@ def new_property():
     admin = users.is_admin(session["user_id"])
 
     if not admin:
-        return error(admin)
+        return error(admin.error)
 
     if type == "text":
         result = properties.new_text_property(name, description)
@@ -93,7 +93,7 @@ def new_property():
     if result:
         return redirect("/admin")
     else:
-        return error(result)
+        return error(result.error)
 
 
 @app.route("/attachtextproperty", methods=["POST"])
@@ -109,7 +109,7 @@ def attach_text_property():
     result = properties.attach_text_property(stuff_id, property_id, text)
     print(result)
     if not result:
-        return error(result)
+        return error(result.error)
 
     return redirect(f"/stuff/{stuff_id}")
 
@@ -125,7 +125,7 @@ def attach_numeric_property():
 
     result = properties.attach_numeric_property(stuff_id, property_id, number)
     if not result:
-        return error(result)
+        return error(result.error)
 
     return redirect(f"/stuff/{stuff_id}")
 
@@ -152,6 +152,8 @@ def stuff(id):
     rel_infos = relations.get_relation_informations()
     print(rel_infos)
 
+    session["current"] = id
+
     return render_template("stuff.html", stuff=stuff,
                            relations=info,
                            reverse_relations=rev_info,
@@ -168,26 +170,39 @@ def attach_relation():
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
 
-    info_id = request.form["info_id"]
-    relator = request.form["relator_id"]
-    new_name = request.form["name"]
-
-    if not (len(new_name) > 1 and len(new_name) < 20):
-        return error("length of name should be 2-20 chars")
-    if new_name[0] == '#':
-        relatee = Ok(new_name[1:])
+    stuff_relates = request.form.get("stuff_relates")
+    if stuff_relates == "true":
+        stuff_relates = True
+    elif stuff_relates == "false":
+        stuff_relates = False
     else:
-        relatee = stuffs.new_stuff(new_name)
+        return error("misused form")
 
-    if relatee:
-        result = relations.attach_relation(info_id, relator, relatee.value)
-    else:
-        return error(relatee)
+    stuff_id = Ok(request.form.get("stuff_id")).then(stuffs.is_owner)
+    if not stuff_id:
+        return error(stuff_id.error)
 
-    if result:
-        return redirect(f"/stuff/{relator}")
+    info_id = Ok(request.form["info_id"]).then(relations.relation_exists)
+    if not info_id:
+        return error(info_id.error)
+
+    new = Ok(request.form["name"]).check(lambda name: len(name) > 1,
+                                         "name should be 2 or more chars") \
+                                  .check(lambda name: len(name) < 20,
+                                         "name should be less than 20 chars") \
+                                  .branch(lambda name: name[0] == '#',
+                                          lambda r: stuffs.is_owner(r[1:]),
+                                          stuffs.new_stuff)
+    if not new:
+        return error(new.error)
+
+    if stuff_relates:
+        rel = relations.attach_relation(info_id.value, stuff_id.value, new.value)
     else:
-        return error(result)
+        rel = relations.attach_relation(info_id.value, new.value, stuff_id.value)
+
+    return rel.conclude(lambda _: redirect(f"/stuff/{session['current']}"),
+                        error)
 
 
 @app.route("/newrootstuff", methods=["POST"])
@@ -201,12 +216,12 @@ def new_rootstuff():
         result = relations.attach_relation(1, session["root_id"],
                                            stuff_id.value)
     else:
-        return error(stuff_id)
+        return error(stuff_id.error)
 
     if result:
         return redirect("/")
     else:
-        return error(result)
+        return error(result.error)
 
 
 @app.route("/logout")
@@ -228,11 +243,11 @@ def register():
 
         created = users.create_user(username, password1)
         if not created:
-            return error(created)
+            return error(created.error)
 
         logged = users.login(username, password1)
         if not logged:
-            return error(logged)
+            return error(logged.error)
 
         return redirect("/")
 

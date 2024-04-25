@@ -19,6 +19,7 @@ def login(username, password):
             session["username"] = username
             session["root_id"] = stuffs.get_root()
             session["csrf_token"] = secrets.token_hex(16)
+            session["current"] = session["root_id"]
             return (True, "")
         else:
             return (False, "Username and password do not match")
@@ -29,6 +30,7 @@ def logout():
     del session["username"]
     del session["root_id"]
     del session["csrf_token"]
+    del session["current"]
 
 
 def create_user(username, password):

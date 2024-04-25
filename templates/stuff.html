@@ -24,7 +24,8 @@
           {% endfor %}
       </select>
 
-      <input type="hidden" name="relator_id" value="{{ stuff.id }}">
+      <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+      <input type="hidden" name="stuff_relates" value="false">
       <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
       <input class="rel-submit" type="submit" value="Create">
     </form>
@@ -108,7 +109,8 @@
       </select>
       <input class="rev-rel-text" type="text" name="name" placeholder="new name or old #id">
 
-      <input type="hidden" name="relator_id" value="{{ stuff.id }}">
+      <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+      <input type="hidden" name="stuff_relates" value="true">
       <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
       <input class="rev-rel-submit" type="submit" value="Create">
     </form>

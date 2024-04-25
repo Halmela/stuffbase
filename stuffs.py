@@ -61,19 +61,20 @@ def new_stuff(name):
         return Err(e)
 
 
-def is_owner(user_id, stuff_id):
+def is_owner(stuff_id):
     try:
         sql = text("""
                 SELECT CAST(COUNT(*) AS BIT)
                 FROM Stuffs
-                WHERE id = :stuff_id AND owner = :user_id
+                WHERE id = COALESCE(:stuff_id,0)
+                  AND owner = COALESCE(:user_id,0)
             """)
         result = db.session.execute(sql, {"stuff_id": stuff_id,
-                                          "user_id": user_id})
+                                          "user_id": session["user_id"]})
         owner = bool(int(result.scalar()))
         if owner:
-            return Ok(())
+            return Ok(stuff_id)
         else:
-            return Err("You are not the owner of that")
+            return Err(f"You do not own #{stuff_id}")
     except Exception as e:
         return Err(e)

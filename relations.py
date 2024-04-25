@@ -1,5 +1,6 @@
 from db import db
 from sqlalchemy.sql import text
+from sqlalchemy.exc import IntegrityError
 from flask import session
 from result import Ok, Err
 
@@ -44,6 +45,17 @@ def get_relation_informations():
     return result.fetchall()
 
 
+def relation_exists(info_id):
+    sql = text("""
+            SELECT CAST(COUNT(*) AS BIT)
+            FROM Relation_informations
+            WHERE id = :info_id
+        """)
+    result = db.session.execute(sql, {"info_id": info_id})
+    exists = bool(int(result.scalar()))
+    return Ok(info_id) if exists else Err(f"relation R{info_id} doesn't exist")
+
+
 def new_relation(description, converse_description):
     try:
         if converse_description:
@@ -81,5 +93,7 @@ def attach_relation(info_id, relator_id, relatee_id):
 
         db.session.commit()
         return Ok(info_id)
+    except IntegrityError:
+        return Err(f"R{info_id}, #{relator_id} or #{relatee_id} doesn't exist")
     except Exception as e:
         return Err(e)
