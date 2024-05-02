@@ -12,6 +12,19 @@ class Ok:
     def __repr__(self):
         return str(self.value)
 
+    def __add__(self, other):
+        print('MULTI')
+        match other:
+            case Ok(val):
+                print('okadd', val)
+                return Ok(self.value + val)
+            case Err(e):
+                print('erredd', e)
+                return Err(e)
+            case x:
+                print('add', x)
+                return self + to_result(x)
+
     def then(self, f, error=None):
         try:
             x = f(self.value)
@@ -50,6 +63,9 @@ class Err:
     def __repr__(self):
         return str(self.error)
 
+    def __add__(self, other):
+        return self
+
     def then(self, f, error=None):
         return self
 
@@ -63,14 +79,16 @@ class Err:
         return err(self.error)
 
 
-def to_result(x):
+def to_result(x, error=None):
     print(x, type(x))
     match x:
         case Ok(value):
             return Ok(value)
-        case Err(error):
-            return Err(error)
-        case None:
-            return Err("value not present")
+        case Err(err) | [Err(err)]:
+            return Err(err)
+        case [Ok(x)]:
+            return Ok([x])
+        case None | [None] | '' | ['']:
+            return Err(error if error else "value not present")
         case value:
             return Ok(value)

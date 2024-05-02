@@ -7,8 +7,7 @@ from result import Ok, Err, to_result
 @app.route("/")
 def index():
     if "root_id" in session:
-        root_info = relations.get_relations(session["root_id"])
-        return render_template("index.html", root_info=root_info)
+        return redirect(f"/stuff/{session['root_id']}")
     else:
         return render_template("index.html")
 
@@ -16,13 +15,12 @@ def index():
 @app.route("/admin")
 def admin():
     if "user_id" not in session:
-        return render_template("index.html")
+        return redirect("/")
 
     if users.is_admin(session["user_id"]):
         return render_template("admin.html")
 
     inexistant = users.admin_does_not_exist()
-    print(inexistant)
     if not inexistant:
         return error(inexistant.error)
 
@@ -42,10 +40,11 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-
-        return users.login(username, password) \
+        return (to_result([request.form.get("username")],
+                          error="Supply an username")
+                + to_result([request.form.get("password")],
+                            error="Supply an password")) \
+            .then(lambda l: users.login(l[0], l[1])) \
             .conclude(lambda _: redirect("/"), error)
 
 
@@ -130,23 +129,23 @@ def attach_numeric_property():
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
 
-    stuff_id = Ok(request.form.get("stuff_id")) \
-        .then(lambda x: int(x), error="Property id is not a number") \
+    stuff_id = to_result(request.form.get("stuff_id")) \
+        .then(lambda x: int(x), error="Stuff id is not a number") \
         .then(stuffs.is_owner)
     if stuff_id:
         stuff_id = stuff_id.value
     else:
         return error(stuff_id.error)
 
-    property_id = Ok(request.form.get("property_id")) \
-        .then(lambda x: int(x), ) \
+    property_id = to_result(request.form.get("property_id")) \
+        .then(lambda x: int(x), error="Property id is not a number") \
         .then(properties.numeric_property_exists)
     if property_id:
         property_id = property_id.value
     else:
         return error(property_id.error)
 
-    number = Ok(request.form.get("number")) \
+    number = to_result(request.form.get("number")) \
         .then(lambda x: int(x), error="Supply a numeric value")
     if number:
         number = number.value
@@ -162,7 +161,7 @@ def attach_numeric_property():
 
 @app.route("/stuff/<int:id>")
 def stuff(id):
-    if "user_id" not in session or id == session["root_id"]:
+    if "user_id" not in session:
         return redirect("/")
 
     stuff = stuffs.get_stuff(id)
@@ -207,25 +206,30 @@ def attach_relation():
     else:
         return error("misused form")
 
-    stuff_id = Ok(request.form.get("stuff_id")).then(stuffs.is_owner)
+    stuff_id = to_result(request.form.get("stuff_id")) \
+        .then(lambda x: int(x), error="Invalid stuff id") \
+        .then(stuffs.is_owner)
     if stuff_id:
         stuff_id = stuff_id.value
     else:
         return error(stuff_id.error)
 
-    info_id = Ok(request.form["info_id"]).then(relations.relation_exists)
+    info_id = to_result(request.form["info_id"]) \
+        .then(lambda x: int(x), error="Invalid relation id") \
+        .then(relations.relation_exists)
     if info_id:
         info_id = info_id.value
     else:
         return error(info_id.error)
 
-    new = Ok(request.form["name"]).check(lambda name: len(name) > 1,
-                                         "name should be 2 or more chars") \
-                                  .check(lambda name: len(name) < 20,
-                                         "name should be less than 20 chars") \
-                                  .branch(lambda name: name[0] == '#',
-                                          lambda r: stuffs.is_owner(r[1:]),
-                                          stuffs.new_stuff)
+    new = to_result(request.form["name"]) \
+        .check(lambda name: len(name) > 1,
+               "name should be 2 or more chars") \
+        .check(lambda name: len(name) < 20,
+               "name should be less than 20 chars") \
+        .branch(lambda name: name[0] == '#',
+                lambda r: stuffs.is_owner(r[1:]),
+                stuffs.new_stuff)
     if new:
         new = new.value
     else:
@@ -245,13 +249,10 @@ def new_rootstuff():
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
 
-    name = request.form["name"]
-    stuff_id = stuffs.new_stuff(name)
-    if stuff_id:
-        result = relations.attach_relation(1, session["root_id"],
-                                           stuff_id.value)
-    else:
-        return error(stuff_id.error)
+    result = to_result(request.form.get("name")) \
+        .check(lambda x: len(x) < 40, "Too long name") \
+        .then(lambda x: stuffs.new_stuff(x)) \
+        .then(lambda x: relations.attach_relation(1, session["root_id"], x))
 
     if result:
         return redirect("/")
