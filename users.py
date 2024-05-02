@@ -4,7 +4,7 @@ from sqlalchemy.sql import text
 from werkzeug.security import check_password_hash, generate_password_hash
 import stuffs
 import secrets
-from os import getenv
+from result import Ok, Err
 
 
 def login(username, password):
@@ -12,7 +12,7 @@ def login(username, password):
     result = db.session.execute(sql, {"username": username})
     user = result.fetchone()
     if not user:
-        return (False, "Invalid username")
+        return Err("Invalid username")
     else:
         if check_password_hash(user.password, password):
             session["user_id"] = user.id
@@ -20,9 +20,9 @@ def login(username, password):
             session["root_id"] = stuffs.get_root()
             session["csrf_token"] = secrets.token_hex(16)
             session["current"] = session["root_id"]
-            return (True, "")
+            return Ok(())
         else:
-            return (False, "Username and password do not match")
+            return Err("Username and password do not match")
 
 
 def logout():
@@ -46,7 +46,7 @@ def create_user(username, password):
         user_id = result.scalar()
 
         if not user_id:
-            return (False, "User not created correctly")
+            return Err("User not created correctly")
 
         # user is not logged at this point, so we can't use stuffs.new_stuff()
         sql = text("""
@@ -63,9 +63,9 @@ def create_user(username, password):
             """)
         db.session.execute(root, {"owner": user_id, "root_id": root_id})
         db.session.commit()
-        return (True, user_id)
+        return Ok(user_id)
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 def promote_admin(id):
@@ -76,9 +76,9 @@ def promote_admin(id):
             """)
         db.session.execute(sql, {"id": id})
         db.session.commit()
-        return (True, None)
+        return Ok(())
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 def admin_does_not_exist():
@@ -88,13 +88,11 @@ def admin_does_not_exist():
                 FROM Admins
             """)
         result = db.session.execute(sql)
-        admin = bool(int(result.scalar()))
 
-        if admin:
-            return (False, "Admin account already exists")
-        return (True, "")
+        return Ok(bool(int(result.scalar()))) \
+            .check(lambda x: x, "Admin account exists")
     except Exception as e:
-        return (False, e)
+        return Err(e)
 
 
 def is_admin(id):
@@ -105,7 +103,8 @@ def is_admin(id):
                 WHERE id = :id
             """)
         result = db.session.execute(sql, {"id": id})
-        admin = bool(int(result.scalar()))
-        return (admin, "" if admin else "You are not a admin")
+
+        return Ok(bool(int(result.scalar()))) \
+            .check(lambda x: x, "You are not an admin")
     except Exception as e:
-        return (False, e)
+        return Err(e)

@@ -1,14 +1,13 @@
 from app import app
 from flask import render_template, request, redirect, session, abort
 import users, stuffs, properties, relations
-from result import Ok, Err
+from result import Ok, Err, to_result
 
 
 @app.route("/")
 def index():
     if "root_id" in session:
         root_info = relations.get_relations(session["root_id"])
-        print(root_info)
         return render_template("index.html", root_info=root_info)
     else:
         return render_template("index.html")
@@ -25,16 +24,13 @@ def admin():
     inexistant = users.admin_does_not_exist()
     print(inexistant)
     if not inexistant:
-        return error("You are not an admin")
+        return error(inexistant.error)
 
     success = users.promote_admin(session["user_id"])
-    print(success)
-
     if not success:
         return error(success.error)
 
     admin = users.is_admin(session["user_id"])
-    print(admin)
     if admin:
         return render_template("admin.html")
     else:
@@ -48,11 +44,9 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        logged = users.login(username, password)
-        if logged:
-            return redirect("/")
-        else:
-            return error(logged.error)
+
+        return users.login(username, password) \
+            .conclude(lambda _: redirect("/"), error)
 
 
 @app.route("/newrelation", methods=["POST"])
@@ -63,10 +57,8 @@ def new_relation():
     description = request.form["description"]
     converse_description = request.form["converse-description"]
 
-    result = relations.new_relation(description, converse_description)
-    if result:
-        return redirect("/admin")
-    return error(result.error)
+    return relations.new_relation(description, converse_description) \
+        .conclude(lambda _: redirect("/admin"), error)
 
 
 @app.route("/newproperty", methods=["POST"])
@@ -102,9 +94,28 @@ def attach_text_property():
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
 
-    stuff_id = request.form["stuff_id"]
-    property_id = request.form["property_id"]
-    text = request.form["text"]
+    stuff_id = to_result(request.form.get("stuff_id")) \
+        .then(lambda x: int(x), error="Stuff id is not a number") \
+        .then(stuffs.is_owner)
+    if stuff_id:
+        stuff_id = stuff_id.value
+    else:
+        return error(stuff_id.error)
+
+    property_id = to_result(request.form.get("property_id")) \
+        .then(lambda x: int(x), error="Property id is not a number") \
+        .then(properties.text_property_exists)
+    if property_id:
+        property_id = property_id.value
+    else:
+        return error(property_id.error)
+
+    text = to_result(request.form.get("text")) \
+        .check(lambda x: bool(x), "Supply text for the property")
+    if text:
+        text = text.value
+    else:
+        return error(text.error)
 
     result = properties.attach_text_property(stuff_id, property_id, text)
     print(result)
@@ -119,9 +130,28 @@ def attach_numeric_property():
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
 
-    stuff_id = request.form["stuff_id"]
-    property_id = request.form["property_id"]
-    number = request.form["number"]
+    stuff_id = Ok(request.form.get("stuff_id")) \
+        .then(lambda x: int(x), error="Property id is not a number") \
+        .then(stuffs.is_owner)
+    if stuff_id:
+        stuff_id = stuff_id.value
+    else:
+        return error(stuff_id.error)
+
+    property_id = Ok(request.form.get("property_id")) \
+        .then(lambda x: int(x), ) \
+        .then(properties.numeric_property_exists)
+    if property_id:
+        property_id = property_id.value
+    else:
+        return error(property_id.error)
+
+    number = Ok(request.form.get("number")) \
+        .then(lambda x: int(x), error="Supply a numeric value")
+    if number:
+        number = number.value
+    else:
+        return error(number.error)
 
     result = properties.attach_numeric_property(stuff_id, property_id, number)
     if not result:
@@ -150,7 +180,6 @@ def stuff(id):
     text_props = properties.get_text_properties().value
     num_props = properties.get_numeric_properties().value
     rel_infos = relations.get_relation_informations()
-    print(rel_infos)
 
     session["current"] = id
 
@@ -179,11 +208,15 @@ def attach_relation():
         return error("misused form")
 
     stuff_id = Ok(request.form.get("stuff_id")).then(stuffs.is_owner)
-    if not stuff_id:
+    if stuff_id:
+        stuff_id = stuff_id.value
+    else:
         return error(stuff_id.error)
 
     info_id = Ok(request.form["info_id"]).then(relations.relation_exists)
-    if not info_id:
+    if info_id:
+        info_id = info_id.value
+    else:
         return error(info_id.error)
 
     new = Ok(request.form["name"]).check(lambda name: len(name) > 1,
@@ -193,13 +226,15 @@ def attach_relation():
                                   .branch(lambda name: name[0] == '#',
                                           lambda r: stuffs.is_owner(r[1:]),
                                           stuffs.new_stuff)
-    if not new:
+    if new:
+        new = new.value
+    else:
         return error(new.error)
 
     if stuff_relates:
-        rel = relations.attach_relation(info_id.value, stuff_id.value, new.value)
+        rel = relations.attach_relation(info_id, stuff_id, new)
     else:
-        rel = relations.attach_relation(info_id.value, new.value, stuff_id.value)
+        rel = relations.attach_relation(info_id, new, stuff_id)
 
     return rel.conclude(lambda _: redirect(f"/stuff/{session['current']}"),
                         error)

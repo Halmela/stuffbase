@@ -42,7 +42,7 @@ def new_text_property(name, description):
 
 
 def attach_text_property(stuff_id, property_id, prop_text):
-    owner = is_owner(session["user_id"], stuff_id)
+    owner = is_owner(stuff_id)
     if not owner:
         return owner
 
@@ -79,7 +79,7 @@ def new_numeric_property(name, description):
 
 
 def attach_numeric_property(stuff_id, property_id, number):
-    owner = is_owner(session["user_id"], stuff_id)
+    owner = is_owner(stuff_id)
     if not owner:
         return owner
 
@@ -118,5 +118,44 @@ def get_numeric_properties():
             """)
         result = db.session.execute(sql)
         return Ok(result.fetchall())
+    except Exception as e:
+        return Err(e)
+
+
+def text_property_exists(id):
+    try:
+        sql = text("""
+                SELECT CAST(COUNT(*) AS BIT)
+                FROM Text_property_informations
+                WHERE id = COALESCE(:id,0)
+            """)
+
+        result = db.session.execute(sql, {"id": id})
+        exists = bool(int(result.scalar()))
+        if exists:
+            print("prop exists")
+            return Ok(id)
+        else:
+            return Err(f"Text propery T{id} does not exist ")
+            print("prop does not exist")
+    except Exception as e:
+        print(f"prop exception {e}")
+        return Err(e)
+
+
+def numeric_property_exists(id):
+    try:
+        sql = text("""
+                SELECT CAST(COUNT(*) AS BIT)
+                FROM Numeric_property_informations
+                WHERE id = COALESCE(:id,0)
+            """)
+
+        result = db.session.execute(sql, {"id": id})
+        exists = bool(int(result.scalar()))
+        if exists:
+            return Ok(id)
+        else:
+            return Err(f"Numeric propery N{id} does not exist ")
     except Exception as e:
         return Err(e)

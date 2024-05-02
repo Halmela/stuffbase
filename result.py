@@ -1,6 +1,10 @@
+from dataclasses import dataclass
+from typing import Any
+
+
+@dataclass
 class Ok:
-    def __init__(self, value):
-        self.value = value
+    value: Any
 
     def __bool__(self):
         return True
@@ -8,14 +12,23 @@ class Ok:
     def __repr__(self):
         return str(self.value)
 
-    def then(self, f):
-        return f(self.value)
+    def then(self, f, error=None):
+        try:
+            x = f(self.value)
+            return to_result(x)
+        except Exception as e:
+            if error:
+                return Err(error)
+            return Err(e)
 
     def check(self, condition, error):
-        if condition(self.value):
-            return Ok(self.value)
-        else:
-            return Err(error)
+        try:
+            if condition(self.value):
+                return Ok(self.value)
+            else:
+                return Err(error)
+        except Exception as e:
+            return Err(e)
 
     def branch(self, condition, true_f, false_f):
         if condition(self.value):
@@ -27,9 +40,9 @@ class Ok:
         return ok(self.value)
 
 
+@dataclass
 class Err:
-    def __init__(self, error):
-        self.error = error
+    error: Any
 
     def __bool__(self):
         return False
@@ -37,7 +50,7 @@ class Err:
     def __repr__(self):
         return str(self.error)
 
-    def then(self, f):
+    def then(self, f, error=None):
         return self
 
     def check(self, condition, error):
@@ -48,3 +61,16 @@ class Err:
 
     def conclude(self, ok, err):
         return err(self.error)
+
+
+def to_result(x):
+    print(x, type(x))
+    match x:
+        case Ok(value):
+            return Ok(value)
+        case Err(error):
+            return Err(error)
+        case None:
+            return Err("value not present")
+        case value:
+            return Ok(value)

@@ -16,8 +16,9 @@
     {% endif %}
     <form action="/attachrelation" method="POST" class="relation-form">
       <!-- <label for="info_id">Choose a relation</label> -->
-      <input class="rel-text" type="text" name="name" placeholder="new name or old #id">
-      <select name="info_id" id="info_id">
+      <input class="rel-text" type="text" name="name" placeholder="new name or old #id" required minlength="2"
+        maxlength="20">
+      <select name="info_id" id="info_id" required>
         <option value="">Relation</option>
         {% for r in rel_infos %}
         <option value={{r[0]}}>{{r[1]}}
@@ -58,28 +59,28 @@
       {% endif %}
       <div class="new-properties">
         <form class="property-form" action="/attachtextproperty" method="POST">
-          <select class="prop-select" name="property_id" id="property_id">
+          <select class="prop-select" name="property_id" id="property_id" required>
             <option value="">Text property</option>
             {% for t in text_props %}
             <option value={{t[0]}}>{{t[1]}}
               {% endfor %}
           </select>
 
-          <textarea class="prop-text" placeholder="Text" name="text"></textarea>
+          <textarea class="prop-text" placeholder="Text" name="text" required minlength="1"></textarea>
           <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
           <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
           <input class="prop-submit" type="submit" value="Create">
         </form>
 
         <form class="property-form" action="/attachnumericproperty" method="POST">
-          <select class="prop-select" name="property_id" id="property_id">
+          <select class="prop-select" name="property_id" id="property_id" required>
             <option value="">Numeric property</option>
             {% for t in num_props %}
             <option value={{t[0]}}>{{t[1]}}
               {% endfor %}
           </select>
 
-          <input class="prop-num" placeholder="number" type="number" name="number">
+          <input class="prop-num" placeholder="number" type="number" name="number" required>
           <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
           <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
           <input class="prop-submit" type="submit" value="Create">
@@ -99,7 +100,7 @@
       {% endfor %}
     </div>
     {% endif %}
-    <form action="/attachrelation" method="POST" class="relation-form">
+    <form action="/attachrelation" method="POST" class="relation-form" required>
       <!-- <label for="info_id">Choose a relation</label> -->
       <select class="rev-rel-select" name="info_id" id="info_id">
         <option value="">Relation</option>
@@ -107,8 +108,9 @@
         <option value={{r[0]}}>{{r[1]}}
           {% endfor %}
       </select>
-      <input class="rev-rel-text" type="text" name="name" placeholder="new name or old #id">
-
+      <input class="rev-rel-text" type="text" name="name" placeholder="new name or old #id" required minlength="2"
+        maxlength="20">
+      required
       <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
       <input type="hidden" name="stuff_relates" value="true">
       <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
