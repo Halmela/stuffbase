@@ -35,8 +35,9 @@
   <div class="stuff-body">
     <h2>#{{stuff.id}} {{stuff.name}}</h2>
     <div class="properties">
-      {% if stuff_props %}
-      <!-- <div class="existing-properties">
+      <div class="existing-properties">
+        {% if stuff_props %}
+        <!-- <div class="existing-properties">
         <div class="property-column">
           {% for i in range(stuff_props | length) %}
           <div class="property-box">{{stuff_props[i][0]}}</div>
@@ -48,43 +49,50 @@
           {% endfor %}
         </div>
       </div> -->
-      <div class="existing-properties">
         {% for p in stuff_props %}
-        <div class="prop-item">
-          <h4>{{p[0]}}</h4>
-          <p>{{p[1]}}</p>
+        <div class="property">
+          <h4 class="prop-item">{{p[0]}}</h4>
+          <p class="prop-item">{{p[1]}}</p>
         </div>
         {% endfor %}
-      </div>
-      {% endif %}
-      <div class="new-properties">
-        <form class="property-form" action="/attachtextproperty" method="POST">
-          <select class="prop-select" name="property_id" id="property_id" required>
-            <option value="">Text property</option>
-            {% for t in text_props %}
-            <option value={{t[0]}}>{{t[1]}}
-              {% endfor %}
-          </select>
+        {% endif %}
+        <div class="property">
+          <div class="prop-item">
+            <form class="property-form" action="/attachtextproperty" method="POST" id="property-form">
+              <select class="prop-select" name="property_id" id="property_id" required>
+                <option value="">Text property</option>
+                {% for t in text_props %}
+                <option value={{t[0]}}>{{t[1]}}
+                  {% endfor %}
+              </select>
+              <input class="prop-submit" type="submit" value="Create">
+              <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+              <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+            </form>
+          </div>
+          <div class="prop-item">
+            <textarea form="property-form" placeholder="Text" name="text" required minlength="1" rows="4"></textarea>
+          </div>
+        </div>
 
-          <textarea class="prop-text" placeholder="Text" name="text" required minlength="1"></textarea>
-          <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
-          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-          <input class="prop-submit" type="submit" value="Create">
-        </form>
+        <div class="property" <div class="prop-item">
+          <div class="prop-item">
+            <form class="property-form" action="/attachnumericproperty" method="POST">
+              <select class="prop-select" name="property_id" id="property_id" required>
+                <option value="">Numeric property</option>
+                {% for t in num_props %}
+                <option value={{t[0]}}>{{t[1]}}
+                  {% endfor %}
+              </select>
 
-        <form class="property-form" action="/attachnumericproperty" method="POST">
-          <select class="prop-select" name="property_id" id="property_id" required>
-            <option value="">Numeric property</option>
-            {% for t in num_props %}
-            <option value={{t[0]}}>{{t[1]}}
-              {% endfor %}
-          </select>
-
-          <input class="prop-num" placeholder="number" type="number" name="number" required>
-          <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
-          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-          <input class="prop-submit" type="submit" value="Create">
-        </form>
+              <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
+              <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+              <input class="prop-submit" type="submit" value="Create">
+          </div>
+          <div class="prop-item"> <input class="prop-num" placeholder="number" type="number" name="number" required>
+          </div>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -110,21 +118,11 @@
       </select>
       <input class="rev-rel-text" type="text" name="name" placeholder="new name or old #id" required minlength="2"
         maxlength="20">
-      required
       <input type="hidden" name="stuff_id" value="{{ stuff.id }}">
       <input type="hidden" name="stuff_relates" value="true">
       <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
       <input class="rev-rel-submit" type="submit" value="Create">
     </form>
   </div>
-
-
-
 </div>
-
-
 {% endblock %}
-
-
-<!--
-  -->

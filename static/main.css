@@ -115,12 +115,7 @@
   margin: 20px;
 }
 
-.existing-properties {
-  display: flex;
-  flex-direction: column;
-}
-
-.prop-item {
+.property {
   display: grid;
   grid-template-columns: 1fr 4fr;
   border: solid green;
@@ -128,34 +123,27 @@
   column-gap: 1%;
 }
 
-.prop-item h4 {
+.prop-item textarea {
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+}
+
+
+.prop-item:nth-child(odd) {
   margin: auto;
   padding: 5%;
-  grid-column: 1 / span 1;
 }
 
-.prop-item p {
+.prop-item:nth-child(even) {
   padding: 1em;
   margin: auto;
+  border-style: none none none solid;
+  width: 90%;
   text-align: left;
   word-break: break-word;
-  border-style: none none none solid;
-  grid-column: 2 / span 4;
-  width: 90%;
 }
 
-.property-column {
-  display: flex;
-  flex-direction: column;
-  padding: 0.2%;
-  flex-grow: 1;
-}
-
-.property-box {
-  border: solid red;
-  padding: 10px;
-  flex-grow: 1;
-}
 
 .new-properties {
   display: flex;
@@ -165,16 +153,12 @@
 }
 
 .property-form {
-  padding: 10px;
-  border: solid black;
+  margin: auto;
+  padding: 5%;
+  grid-column: 1 / span 1;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   width: fit-content;
-}
-
-.prop-text {
-  grid-column: 2 / span 4;
-  grid-row: 1 / span 2;
 }
 
 .prop-select {
