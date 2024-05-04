@@ -63,7 +63,7 @@ def create_user(username, password):
             """)
         db.session.execute(root, {"owner": user_id, "root_id": root_id})
         db.session.commit()
-        return Ok(user_id)
+        return Ok([username, password, user_id])
     except Exception as e:
         return Err(e)
 

@@ -82,13 +82,15 @@ class Err:
 def to_result(x, error=None):
     print(x, type(x))
     match x:
+        case None | [None] | '' | ['', *_]:
+            return Err(error if error else "value not present")
         case Ok(value):
             return Ok(value)
-        case Err(err) | [Err(err)]:
+        case Err(err) | [Err(err), *_]:
             return Err(err)
-        case [Ok(x)]:
+        case [Ok(x), *rest] | [x, *rest]:
+            return Ok([x]) + to_result(rest, error=error)
+        case [Ok(x)] | [x]:
             return Ok([x])
-        case None | [None] | '' | ['']:
-            return Err(error if error else "value not present")
         case value:
             return Ok(value)

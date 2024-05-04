@@ -271,21 +271,32 @@ def register():
     if request.method == "GET":
         return render_template("register.html")
     if request.method == "POST":
-        username = request.form["username"]
-        password1 = request.form["password1"]
-        password2 = request.form["password2"]
-        if password1 != password2:
-            return error("Passwords are not the same")
+        return (to_result([request.form.get("username")],
+                error="supply an username")
+                + to_result([request.form.get("password1")],
+                error="supply a password")
+                + to_result([request.form.get("password2")],
+                error="supply the password twice")) \
+            .check(lambda f: f[1] == f[2], "Passwords are not the same") \
+            .then(lambda f: users.create_user(f[0], f[1])) \
+            .then(lambda u: users.login(u[0], u[1])) \
+            .conclude(lambda _: redirect("/"), error)
 
-        created = users.create_user(username, password1)
-        if not created:
-            return error(created.error)
+        # username = request.form["username"]
+        # password1 = request.form["password1"]
+        # password2 = request.form["password2"]
+        # if password1 != password2:
+        #     return error("Passwords are not the same")
 
-        logged = users.login(username, password1)
-        if not logged:
-            return error(logged.error)
+        # created = users.create_user(username, password1)
+        # if not created:
+        #     return error(created.error)
 
-        return redirect("/")
+        # logged = users.login(username, password1)
+        # if not logged:
+        #     return error(logged.error)
+
+        # return redirect("/")
 
 
 def error(message):
