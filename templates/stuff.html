@@ -36,18 +36,6 @@
     <h2>#{{stuff.id}} {{stuff.name}}</h2>
     <div class="properties">
       {% if stuff_props %}
-      <!-- <div class="existing-properties">
-        <div class="property-column">
-          {% for i in range(stuff_props | length) %}
-          <div class="property-box">{{stuff_props[i][0]}}</div>
-          {% endfor %}
-        </div>
-        <div class="property-column">
-          {% for i in range(stuff_props | length) %}
-          <div class="property-box">{{stuff_props[i][1]}}</div>
-          {% endfor %}
-        </div>
-      </div> -->
       {% for p in stuff_props %}
       <div class="property">
         <h4 class="prop-item">{{p[0]}}</h4>

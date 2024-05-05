@@ -4,7 +4,7 @@
 <p>Create new relation</p>
 <form action="/newrelation" method="POST">
   <p>Description:<br>
-    <input type="text" name="description">
+    <input type="text" name="description" required>
   </p>
   <div>
     <p>Optional converse relation</p>
@@ -19,14 +19,14 @@
 <p>Create new property</p>
 <form action="/newproperty" method="POST">
   <p>Name:<br>
-    <input type="text" name="name">
+    <input type="text" name="name" required>
   </p>
   <p>Description:<br>
-    <input type="text" name="description">
+    <input type="text" name="description" required>
   </p>
   <p>Type of property</p>
   <div>
-    <input type="radio" id="text" name="type" value="text" />
+    <input type="radio" id="text" name="type" value="text" required />
     <label for="text">Text</label>
   </div>
   <div>

@@ -1,7 +1,7 @@
 from app import app
 from flask import render_template, request, redirect, session, abort
 import users, stuffs, properties, relations
-from result import Ok, Err, to_result
+from result import Ok, Err, to_result, Result
 
 
 @app.route("/")
@@ -52,11 +52,15 @@ def login():
 def new_relation():
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
+    admin = users.is_admin(session["user_id"])
 
-    description = request.form["description"]
-    converse_description = request.form["converse-description"]
+    if not admin:
+        return error(admin.error)
 
-    return relations.new_relation(description, converse_description) \
+    print(request.form)
+    return Result(request.form.get("description"), "Missing a description") \
+        .then(lambda d: relations.new_relation(d, request.form.get(
+                                                  "converse-description"))) \
         .conclude(lambda _: redirect("/admin"), error)
 
 
@@ -65,26 +69,19 @@ def new_property():
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
 
-    name = request.form["name"]
-    description = request.form["description"]
-    type = request.form["type"]
-
     admin = users.is_admin(session["user_id"])
 
     if not admin:
         return error(admin.error)
 
-    if type == "text":
-        result = properties.new_text_property(name, description)
-    elif type == "numeric":
-        result = properties.new_numeric_property(name, description)
-    else:
-        return error("you did a funny")
-
-    if result:
-        return redirect("/admin")
-    else:
-        return error(result.error)
+    return Result([(request.form.get("name"), "Supply a name"),
+                   (request.form.get("description"), "Supply a description"),
+                   (request.form.get("type"), "Choose a type")]) \
+        .check(lambda r: r[2] == "text" or r[2] == "numeric", "misused form") \
+        .branch(lambda r: r[2] == "text",
+                lambda r: properties.new_text_property(r[0], r[1]),
+                lambda r: properties.new_numeric_property(r[0], r[1])) \
+        .conclude(lambda _: redirect("/admin"), error)
 
 
 @app.route("/attachtextproperty", methods=["POST"])
@@ -281,22 +278,6 @@ def register():
             .then(lambda f: users.create_user(f[0], f[1])) \
             .then(lambda u: users.login(u[0], u[1])) \
             .conclude(lambda _: redirect("/"), error)
-
-        # username = request.form["username"]
-        # password1 = request.form["password1"]
-        # password2 = request.form["password2"]
-        # if password1 != password2:
-        #     return error("Passwords are not the same")
-
-        # created = users.create_user(username, password1)
-        # if not created:
-        #     return error(created.error)
-
-        # logged = users.login(username, password1)
-        # if not logged:
-        #     return error(logged.error)
-
-        # return redirect("/")
 
 
 def error(message):

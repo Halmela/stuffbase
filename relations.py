@@ -57,6 +57,7 @@ def relation_exists(info_id):
 
 
 def new_relation(description, converse_description):
+    print(description,converse_description)
     try:
         if converse_description:
             sql = text("""
