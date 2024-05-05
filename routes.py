@@ -9,6 +9,7 @@ def index():
     if "root_id" in session:
         return redirect(f"/stuff/{session['root_id']}")
     else:
+        session["site"] = "/"
         return render_template("index.html")
 
 
@@ -30,6 +31,7 @@ def admin():
 
     admin = users.is_admin(session["user_id"])
     if admin:
+        session["site"] = "/admin"
         return render_template("admin.html")
     else:
         return error(admin.error)
@@ -37,6 +39,7 @@ def admin():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    session["site"] = "/login"
     if request.method == "GET":
         return render_template("login.html")
     if request.method == "POST":
@@ -161,6 +164,12 @@ def stuff(id):
     if "user_id" not in session:
         return redirect("/")
 
+    error = session.get("error")
+    if error:
+        del session["error"]
+    session["current"] = id
+    session["site"] = f"/stuff/{id}"
+
     stuff = stuffs.get_stuff(id)
     if not stuff:
         return error(f"you do not have stuff with id {id}")
@@ -176,11 +185,6 @@ def stuff(id):
     text_props = properties.get_text_properties().value
     num_props = properties.get_numeric_properties().value
     rel_infos = relations.get_relation_informations()
-
-    error = session.get("error")
-    if error:
-        del session["error"]
-    session["current"] = id
 
     return render_template("stuff.html", stuff=stuff,
                            relations=info,
@@ -198,7 +202,6 @@ def attach_relation():
     print(request.form)
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
-    site = f"/stuff/{session['current']}"
 
     stuff_relates = request.form.get("stuff_relates")
     if stuff_relates == "true":
@@ -206,7 +209,7 @@ def attach_relation():
     elif stuff_relates == "false":
         stuff_relates = False
     else:
-        return error("misused form", site=site)
+        return error("misused form")
 
     stuff_id = to_result(request.form.get("stuff_id")) \
         .then(lambda x: int(x), error="Invalid stuff id") \
@@ -214,7 +217,7 @@ def attach_relation():
     if stuff_id:
         stuff_id = stuff_id.value
     else:
-        return error(stuff_id.error, site=site)
+        return error(stuff_id.error)
 
     info_id = to_result(request.form["info_id"]) \
         .then(lambda x: int(x), error="Invalid relation id") \
@@ -222,7 +225,7 @@ def attach_relation():
     if info_id:
         info_id = info_id.value
     else:
-        return error(info_id.error, site=site)
+        return error(info_id.error)
 
     new = Result(request.form.get("name")) \
         .check(lambda name: len(name) > 1,
@@ -238,17 +241,15 @@ def attach_relation():
     if new:
         new = new.value
     else:
-        return error(new.error, site=site)
+        return error(new.error)
 
     if stuff_relates:
         rel = relations.attach_relation(info_id, stuff_id, new)
     else:
         rel = relations.attach_relation(info_id, new, stuff_id)
 
-    print(site)
-
-    return rel.conclude(lambda _: redirect(site),
-                        lambda e: error(e, site=site))
+    return rel.conclude(lambda _: redirect(session["site"]),
+                        lambda e: error(e))
 
 
 @app.route("/newrootstuff", methods=["POST"])
@@ -275,6 +276,7 @@ def logout():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    session["site"] = "/register"
     if request.method == "GET":
         return render_template("register.html")
     if request.method == "POST":
@@ -290,9 +292,6 @@ def register():
             .conclude(lambda _: redirect("/"), error)
 
 
-def error(message, site=None):
-    print(site, message)
-    if not site:
-        return render_template("error.html", message=message)
+def error(message):
     session["error"] = message
-    return redirect(site)
+    return redirect(session["site"])
