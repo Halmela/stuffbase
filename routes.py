@@ -177,6 +177,9 @@ def stuff(id):
     num_props = properties.get_numeric_properties().value
     rel_infos = relations.get_relation_informations()
 
+    error = session.get("error")
+    if error:
+        del session["error"]
     session["current"] = id
 
     return render_template("stuff.html", stuff=stuff,
@@ -186,7 +189,8 @@ def stuff(id):
                            stuff_props=stuff_props,
                            text_props=text_props,
                            num_props=num_props,
-                           rel_infos=rel_infos)
+                           rel_infos=rel_infos,
+                           error=error)
 
 
 @app.route("/attachrelation", methods=["POST"])
@@ -194,6 +198,7 @@ def attach_relation():
     print(request.form)
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)
+    site = f"/stuff/{session['current']}"
 
     stuff_relates = request.form.get("stuff_relates")
     if stuff_relates == "true":
@@ -201,7 +206,7 @@ def attach_relation():
     elif stuff_relates == "false":
         stuff_relates = False
     else:
-        return error("misused form")
+        return error("misused form", site=site)
 
     stuff_id = to_result(request.form.get("stuff_id")) \
         .then(lambda x: int(x), error="Invalid stuff id") \
@@ -209,7 +214,7 @@ def attach_relation():
     if stuff_id:
         stuff_id = stuff_id.value
     else:
-        return error(stuff_id.error)
+        return error(stuff_id.error, site=site)
 
     info_id = to_result(request.form["info_id"]) \
         .then(lambda x: int(x), error="Invalid relation id") \
@@ -217,28 +222,33 @@ def attach_relation():
     if info_id:
         info_id = info_id.value
     else:
-        return error(info_id.error)
+        return error(info_id.error, site=site)
 
-    new = to_result(request.form["name"]) \
+    new = Result(request.form.get("name")) \
         .check(lambda name: len(name) > 1,
                "name should be 2 or more chars") \
         .check(lambda name: len(name) < 20,
                "name should be less than 20 chars") \
         .branch(lambda name: name[0] == '#',
-                lambda r: stuffs.is_owner(r[1:]),
+                lambda r: Result((r, "invalid id"))
+                .then(lambda id: int(id[1:]))
+                .then(stuffs.is_owner),
                 stuffs.new_stuff)
+
     if new:
         new = new.value
     else:
-        return error(new.error)
+        return error(new.error, site=site)
 
     if stuff_relates:
         rel = relations.attach_relation(info_id, stuff_id, new)
     else:
         rel = relations.attach_relation(info_id, new, stuff_id)
 
-    return rel.conclude(lambda _: redirect(f"/stuff/{session['current']}"),
-                        error)
+    print(site)
+
+    return rel.conclude(lambda _: redirect(site),
+                        lambda e: error(e, site=site))
 
 
 @app.route("/newrootstuff", methods=["POST"])
@@ -280,5 +290,9 @@ def register():
             .conclude(lambda _: redirect("/"), error)
 
 
-def error(message):
-    return render_template("error.html", message=message)
+def error(message, site=None):
+    print(site, message)
+    if not site:
+        return render_template("error.html", message=message)
+    session["error"] = message
+    return redirect(site)

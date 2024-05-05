@@ -7,6 +7,16 @@
   align-self: center;
 }
 
+.error {
+  background: red;
+  outline: black;
+}
+
+.success {
+  background: yellow;
+  outline: black;
+}
+
 .stuff {
   display: flex;
   flex-direction: row;

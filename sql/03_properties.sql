@@ -7,6 +7,7 @@ INSERT INTO Text_property_informations (name, description) VALUES ('Manufacturer
 
 
 -- INSERT INTO Numeric_property_informations VALUES ('', '');
+INSERT INTO Numeric_property_informations (name, description) VALUES ('#id', 'Unique identifier for stuff');
 INSERT INTO Numeric_property_informations (name, description) VALUES ('Amount', 'How many copies of the stuff');
 INSERT INTO Numeric_property_informations (name, description) VALUES ('Height (cm)', 'How tall the stuff is');
 INSERT INTO Numeric_property_informations (name, description) VALUES ('Width (cm)', 'How wide the stuff is');

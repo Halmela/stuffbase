@@ -2,6 +2,7 @@ from db import db
 from sqlalchemy.sql import text
 from flask import session
 from result import Ok, Err
+from properties import attach_numeric_property, attach_text_property
 
 
 def get_root():
@@ -55,6 +56,9 @@ def new_stuff(name):
         result = db.session.execute(sql, {"name": name,
                                           "owner": session["user_id"]})
         id = result.scalar()
+        attach_numeric_property(id, 1, id)
+        attach_text_property(id, 1, name)
+
         db.session.commit()
         return Ok(id)
     except Exception as e:

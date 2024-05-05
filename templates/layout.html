@@ -4,6 +4,12 @@
 
 <div class="header">
   <h1><a href="/">Stuffbase</a></h1>
+  {% if error %}
+  <p class="error">{{ error }}</p>
+  {% endif %}
+  {% if success %}
+  <p class="success">{{ success }}</p>
+  {% endif %}
   {% if session.username %}
   <!-- <p>Logged in as {{ session.username }}</p> -->
   <a href="/logout">Log out</a>

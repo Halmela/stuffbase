@@ -39,7 +39,6 @@ def get_relation_informations():
     sql = text("""
             SELECT id, description
             FROM Relation_informations
-            WHERE NOT (id = 1 OR id = 2)
         """)
     result = db.session.execute(sql)
     return result.fetchall()
@@ -57,7 +56,6 @@ def relation_exists(info_id):
 
 
 def new_relation(description, converse_description):
-    print(description,converse_description)
     try:
         if converse_description:
             sql = text("""

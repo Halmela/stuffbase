@@ -16,7 +16,7 @@ CREATE TABLE Stuffs (
 
 CREATE TABLE Relation_informations (
     id SERIAL PRIMARY KEY,
-    description TEXT
+    description TEXT UNIQUE
 );
 
 

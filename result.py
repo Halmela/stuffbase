@@ -142,7 +142,7 @@ class Result:
             self.error = error if error else exception
 
     def __bool__(self):
-        return self.variant
+        return self.variant.value
 
     # def __repr__(self):
     #     if self.variant:
@@ -180,14 +180,27 @@ class Result:
     #                     self.error = err
 
     def then(self, f, error=None):
+        print(self)
         if self.variant == Variant.ERR:
+            print("return self")
             return self
         try:
-            x = f(self.value)
-            self = Result(x, error)
+            match f(self.value):
+                case Result(variant=Variant.OK, value=val) | Ok(value=val):
+                    print("thenval", val)
+                    self.value = val
+                case Result(variant=Variant.ERR, error=err) | Err(error=err):
+                    print("thenerr", err)
+                    self.variant = Variant.ERR
+                    self.error = err
+                case x:
+                    print("x", x)
+                    self.value = x
+
         except Exception as exception:
             self.variant = Variant.ERR
-            self.error = error if error else exception
+            self.error = error if error else \
+                self.error if self.error else exception
         return self
 
     def check(self, condition, error):

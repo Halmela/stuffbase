@@ -1,7 +1,6 @@
 from db import db
 from sqlalchemy.sql import text
 from flask import session
-from stuffs import is_owner
 from result import Ok, Err
 
 
@@ -42,10 +41,6 @@ def new_text_property(name, description):
 
 
 def attach_text_property(stuff_id, property_id, prop_text):
-    owner = is_owner(stuff_id)
-    if not owner:
-        return owner
-
     try:
         print(stuff_id, property_id, text)
         sql = text("""
@@ -79,10 +74,6 @@ def new_numeric_property(name, description):
 
 
 def attach_numeric_property(stuff_id, property_id, number):
-    owner = is_owner(stuff_id)
-    if not owner:
-        return owner
-
     try:
         sql = text("""
                 INSERT INTO Numeric_properties
