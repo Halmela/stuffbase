@@ -10,7 +10,10 @@ def index():
         return redirect(f"/stuff/{session['root_id']}")
     else:
         session["site"] = "/"
-        return render_template("index.html")
+        last_error = session.get("error")
+        if last_error:
+            del session["error"]
+        return render_template("index.html", error=last_error)
 
 
 @app.route("/admin")
@@ -32,7 +35,10 @@ def admin():
     admin = users.is_admin(session["user_id"])
     if admin:
         session["site"] = "/admin"
-        return render_template("admin.html")
+        last_error = session.get("error")
+        if last_error:
+            del session["error"]
+        return render_template("admin.html", error=last_error)
     else:
         return error(admin.error)
 
@@ -40,15 +46,19 @@ def admin():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     session["site"] = "/login"
+    last_error = session.get("error")
+    if last_error:
+        del session["error"]
+
     if request.method == "GET":
-        return render_template("login.html")
+        return render_template("login.html", error=last_error)
     if request.method == "POST":
         return (to_result([request.form.get("username")],
                           error="Supply an username")
                 + to_result([request.form.get("password")],
                             error="Supply an password")) \
             .then(lambda l: users.login(l[0], l[1])) \
-            .conclude(lambda _: redirect("/"), error)
+            .conclude(error)
 
 
 @app.route("/newrelation", methods=["POST"])
@@ -164,8 +174,8 @@ def stuff(id):
     if "user_id" not in session:
         return redirect("/")
 
-    error = session.get("error")
-    if error:
+    last_error = session.get("error")
+    if last_error:
         del session["error"]
     session["current"] = id
     session["site"] = f"/stuff/{id}"
@@ -194,7 +204,7 @@ def stuff(id):
                            text_props=text_props,
                            num_props=num_props,
                            rel_infos=rel_infos,
-                           error=error)
+                           error=last_error)
 
 
 @app.route("/attachrelation", methods=["POST"])
@@ -277,15 +287,19 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     session["site"] = "/register"
+    last_error = session.get("error")
+    if last_error:
+        del session["error"]
+
     if request.method == "GET":
-        return render_template("register.html")
+        return render_template("register.html", error=last_error)
     if request.method == "POST":
-        return (to_result([request.form.get("username")],
-                error="supply an username")
-                + to_result([request.form.get("password1")],
-                error="supply a password")
-                + to_result([request.form.get("password2")],
-                error="supply the password twice")) \
+        return Result([(request.form.get("username"),
+                       "supply an username"),
+                       (request.form.get("password1"),
+                       "supply a password"),
+                       (request.form.get("password2"),
+                       "supply the password twice")]) \
             .check(lambda f: f[1] == f[2], "Passwords are not the same") \
             .then(lambda f: users.create_user(f[0], f[1])) \
             .then(lambda u: users.login(u[0], u[1])) \

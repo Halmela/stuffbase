@@ -31,6 +31,7 @@ def logout():
     del session["root_id"]
     del session["csrf_token"]
     del session["current"]
+    del session["site"]
 
 
 def create_user(username, password):
